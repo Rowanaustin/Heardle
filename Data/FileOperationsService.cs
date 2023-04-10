@@ -8,7 +8,7 @@ namespace RadioHeardleServer.Data
 		private static string songFile = "Data/currentSong.txt";
 		private static string lastUpdatedFile = "Data/lastUpdated.txt";
 		private static string songListFile = "Data/songList.txt";
-		private static readonly TimeSpan updateAfter = new TimeSpan(0, 5, 0);
+		private static readonly TimeSpan updateAfter = new TimeSpan(6, 0, 0);
 		private static readonly TimeSpan serverTimeBehind = new TimeSpan(7, 0, 0);
 
 		private static int fileNameIndex = 0;
@@ -33,6 +33,9 @@ namespace RadioHeardleServer.Data
 		private bool NeedNewData()
 		{
 			if (!FileExists(lastUpdatedFile))
+				return true;
+			var songName = ReadLine(songFile, songNameIndex);
+			if (songName == null || songName.Length == 0)
 				return true;
 
 			DateTime oldDate = GetTimeUpdated();

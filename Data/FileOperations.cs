@@ -9,7 +9,7 @@ namespace RadioHeardleServer.Data
 		private static string songFile = "data/currentSong.txt";
 		private static string lastUpdatedFile = "data/lastUpdated.txt";
 		private static string songListFile = "data/songList.txt";
-		private static readonly TimeSpan updateAfter = new TimeSpan(0, 5, 0);
+		private static readonly TimeSpan updateAfter = new TimeSpan(24, 0, 0);
 		private static readonly TimeSpan serverTimeBehind = new TimeSpan(7, 0, 0);
 
 		private static int fileNameIndex = 0;

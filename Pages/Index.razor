@@ -108,7 +108,7 @@
 			CallJsFunc("PlaySound");
 
 			//set timer
-			var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(100));
+			var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(160));
 			while (await timer.WaitForNextTickAsync() && Value <= BufferValue)
 			{
 				Value += 1;
