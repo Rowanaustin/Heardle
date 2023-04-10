@@ -1,8 +1,8 @@
 ﻿@page "/"
 @using MudBlazor
-@using Radioheardle.Client;
+@using RadioHeardleServer.Data;
 @inject IJSRuntime JsRuntime;
-@inject HttpClient httpClient;
+@inject FileOperationsService fileOperationsService;
 
 <PageTitle>Radioheardle</PageTitle>
 
@@ -25,7 +25,6 @@
 				<MudIcon Icon="@_skipIcons[2]"></MudIcon>
 				<MudIcon Icon="@_skipIcons[3]"></MudIcon>
 				<MudIcon Icon="@_skipIcons[4]"></MudIcon>
-				<MudIcon Icon="@_skipIcons[5]"></MudIcon>
 			</MudStack>
 		</MudCardContent>
 	</MudCard>
@@ -58,17 +57,19 @@
 
 	private IJSObjectReference _jsModule;
 
-	protected override async Task OnInitializedAsync()
+	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		_jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/SoundScripts.js");
+		if (firstRender)
+		{
+			_jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/SoundScripts.js");
+		}
 	}
 
 	protected override void OnInitialized()
 	{
-		FileOperations fileOperations = new FileOperations("wwwroot" + $"{System.IO.Directory.GetCurrentDirectory()}");
-		var songData = fileOperations.GetData();
+		var songData = fileOperationsService.GetData();
 
-		_audioAddress = "Audio/" + songData._fileName;
+		_audioAddress = "./Audio/" + songData._fileName;
 		_songName = songData._songName;
 		//_audioAddress = "Audio/InterspaceGarden.mp3";
 
@@ -111,6 +112,7 @@
 
 	private void CallJsFunc(string funcName)
 	{
+		Console.WriteLine("calling " + funcName);
 		_jsModule.InvokeVoidAsync(funcName);
 	}
 }

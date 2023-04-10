@@ -15,7 +15,7 @@ namespace RadioHeardleServer
 			builder.Services.AddRazorPages();
 			builder.Services.AddServerSideBlazor();
 			builder.Services.AddMudServices();
-			builder.Services.AddSingleton<WeatherForecastService>();
+			builder.Services.AddSingleton<FileOperationsService>();
 
 			var app = builder.Build();
 
