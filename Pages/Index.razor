@@ -10,6 +10,7 @@
 <MudStack>
 	<MudCard>
 		<MudCardContent>
+			<MudChip hidden="@hideChip" Color="@chipColor" Text="@chipText"></MudChip>
 			<MudProgressLinear Color="Color.Secondary" Value="@BufferValue" Class="my-7" />
 			<MudProgressLinear Color="Color.Primary" Value="@Value" Class="my-7" />
 			<MudSwitch @bind-Checked="@PlaySwitch" Label="Play" Color="Color.Success" />
@@ -26,6 +27,10 @@
 				<MudIcon Icon="@_skipIcons[3]"></MudIcon>
 				<MudIcon Icon="@_skipIcons[4]"></MudIcon>
 			</MudStack>
+			<MudStack Row=true>
+				<MudTextField @bind-Value="TextValue" Label="Outlined" Variant="Variant.Outlined" ReadOnly="@GameCompleted"></MudTextField>
+				<MudButton @onclick="@HandleOnGuess" Disabled="@GameCompleted">Guess</MudButton>
+			</MudStack>
 		</MudCardContent>
 	</MudCard>
 </MudStack>
@@ -34,8 +39,15 @@
 
 
 @code {
+	public bool GameCompleted { get; set; } = false;
 	public int Value { get; set; } = 0;
 	public int BufferValue { get; set; } = 20;
+
+	public string TextValue { get; set; }
+
+	private bool hideChip = true;
+	private Color chipColor;
+	private string chipText;
 
 	private bool _playSwitch = false;
 	public bool PlaySwitch
@@ -105,9 +117,33 @@
 
 	private void HandleOnSkip()
 	{
-		BufferValue += 10;
-		_skipLoc += 1;
-		_skipIcons[_skipLoc] = Icons.Material.Filled.LockOpen;
+		BufferValue += 20;
+
+		if (_skipLoc == 4)
+			CompleteGame(false);
+		else
+		{
+			_skipLoc += 1;
+			_skipIcons[_skipLoc] = Icons.Material.Filled.LockOpen;
+		}
+	}
+
+	private void HandleOnGuess()
+	{
+		if (TextValue.Equals(_songName))
+			CompleteGame(true);
+		else
+			TextValue = "";
+	}
+
+	private void CompleteGame(bool win)
+	{
+		TextValue = _songName;
+		GameCompleted = true;
+
+		chipColor = win ? Color.Success : Color.Error;
+		chipText = win ? "Success" : "Failure";
+		hideChip = false;
 	}
 
 	private void CallJsFunc(string funcName)
