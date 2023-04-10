@@ -10,6 +10,8 @@
 <MudStack>
 	<MudCard>
 		<MudCardContent>
+			<MudText><h1>Radioheardle</h1></MudText>
+			<MudText>@_updatedTime</MudText>
 			<MudChip hidden="@gameIncomplete" Color="@chipColor" Text="@chipText"></MudChip>
 			<MudProgressLinear Color="Color.Secondary" Value="@BufferValue" Class="my-7" />
 			<MudProgressLinear Color="Color.Primary" Value="@Value" Class="my-7" />
@@ -71,6 +73,7 @@
 
 	private string _audioAddress;
 	private string _songName;
+	private string _updatedTime;
 
 	private bool _disposed;
 
@@ -90,8 +93,9 @@
 	{
 		var songData = fileOperationsService.GetData();
 
-		_audioAddress = "./Audio/" + songData._fileName;
-		_songName = songData._songName;
+		_audioAddress = "./Audio/" + songData._songData._fileName;
+		_songName = songData._songData._songName;
+		_updatedTime = songData._updateDate.Date.ToShortTimeString();
 
 		Console.WriteLine(_songName);
 
@@ -147,7 +151,7 @@
 	{
 		var trimmed = _songName.Trim();
 		GuessText = GuessText == null ? "" : GuessText;
-		if (GuessText.Equals(trimmed))
+		if (string.Compare(GuessText, trimmed, true) == 0)
 			CompleteGame(true);
 		else
 			GuessText = "";

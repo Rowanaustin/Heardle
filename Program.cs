@@ -15,7 +15,7 @@ namespace RadioHeardleServer
 			builder.Services.AddRazorPages();
 			builder.Services.AddServerSideBlazor();
 			builder.Services.AddMudServices();
-			builder.Services.AddSingleton<FileOperationsService>();
+			builder.Services.AddSingleton<FileOperationsService>(s => new FileOperationsService(!builder.Environment.IsDevelopment()));
 
 			var app = builder.Build();
 
