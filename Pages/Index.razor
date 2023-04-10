@@ -10,7 +10,7 @@
 <MudStack>
 	<MudCard>
 		<MudCardContent>
-			<MudChip hidden="@hideChip" Color="@chipColor" Text="@chipText"></MudChip>
+			<MudChip hidden="@gameIncomplete" Color="@chipColor" Text="@chipText"></MudChip>
 			<MudProgressLinear Color="Color.Secondary" Value="@BufferValue" Class="my-7" />
 			<MudProgressLinear Color="Color.Primary" Value="@Value" Class="my-7" />
 			<MudSwitch @bind-Checked="@PlaySwitch" Label="Play" Color="Color.Success" />
@@ -28,9 +28,14 @@
 				<MudIcon Icon="@_skipIcons[4]"></MudIcon>
 			</MudStack>
 			<MudStack Row=true>
-				<MudTextField @bind-Value="TextValue" Label="Outlined" Variant="Variant.Outlined" ReadOnly="@GameCompleted"></MudTextField>
+				<MudTextField @bind-Value="GuessText" Variant="Variant.Filled" ReadOnly="@GameCompleted">Guess...</MudTextField>
 				<MudButton @onclick="@HandleOnGuess" Disabled="@GameCompleted">Guess</MudButton>
 			</MudStack>
+		</MudCardContent>
+	</MudCard>
+	<MudCard>
+		<MudCardContent>
+			<MudTextField @bind-Value="ResultText" Variant="Variant.Outlined" hidden="@gameIncomplete" ReadOnly="true"></MudTextField>
 		</MudCardContent>
 	</MudCard>
 </MudStack>
@@ -39,13 +44,17 @@
 
 
 @code {
+
+	private static int _numGuesses = 5;
+
 	public bool GameCompleted { get; set; } = false;
 	public int Value { get; set; } = 0;
-	public int BufferValue { get; set; } = 20;
+	public int BufferValue { get; set; } = 100 / _numGuesses;
 
-	public string TextValue { get; set; }
+	public string GuessText { get; set; }
+	public string ResultText { get; set; }
 
-	private bool hideChip = true;
+	private bool gameIncomplete = true;
 	private Color chipColor;
 	private string chipText;
 
@@ -56,7 +65,7 @@
 		set { _playSwitch = value; HandleOnPlayChanged(); }
 	}
 
-	private string[] _skipIcons = new string[5];
+	private string[] _skipIcons = new string[_numGuesses];
 
 	private int _skipLoc = 0;
 
@@ -83,7 +92,8 @@
 
 		_audioAddress = "./Audio/" + songData._fileName;
 		_songName = songData._songName;
-		//_audioAddress = "Audio/InterspaceGarden.mp3";
+
+		Console.WriteLine(_songName);
 
 		for (var i = 0; i < _skipIcons.Length; i++)
 			_skipIcons[i] = Icons.Material.Filled.Lock;
@@ -117,12 +127,17 @@
 
 	private void HandleOnSkip()
 	{
-		BufferValue += 20;
-
-		if (_skipLoc == 4)
-			CompleteGame(false);
+		if (_skipLoc >= (_numGuesses-1))
+		{
+			if (!GameCompleted)
+			{
+				_skipLoc = _numGuesses;
+				CompleteGame(false);
+			}
+		}
 		else
 		{
+			BufferValue += (100 / _numGuesses);
 			_skipLoc += 1;
 			_skipIcons[_skipLoc] = Icons.Material.Filled.LockOpen;
 		}
@@ -130,25 +145,44 @@
 
 	private void HandleOnGuess()
 	{
-		if (TextValue.Equals(_songName))
+		var trimmed = _songName.Trim();
+		GuessText = GuessText == null ? "" : GuessText;
+		if (GuessText.Equals(trimmed))
 			CompleteGame(true);
 		else
-			TextValue = "";
+			GuessText = "";
 	}
 
 	private void CompleteGame(bool win)
 	{
-		TextValue = _songName;
+		GuessText = _songName;
 		GameCompleted = true;
+
+		ResultText = GetResultText();
 
 		chipColor = win ? Color.Success : Color.Error;
 		chipText = win ? "Success" : "Failure";
-		hideChip = false;
+		gameIncomplete = false;
+	}
+
+	private string GetResultText()
+	{
+		var text = "Radioheardle: ";
+		for (int i = 0; i < _numGuesses;i++)
+		{
+			if (i < _skipLoc)
+				text += "X";
+			else if (i == _skipLoc)
+				text += "O";
+			else
+				text += "-";
+		}
+
+		return text;
 	}
 
 	private void CallJsFunc(string funcName)
 	{
-		Console.WriteLine("calling " + funcName);
 		_jsModule.InvokeVoidAsync(funcName);
 	}
 }

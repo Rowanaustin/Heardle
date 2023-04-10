@@ -29,18 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="wwwroot\Audio\InterspaceGarden.mp3" />
-    <None Include="wwwroot\Audio\Unrestful.mp3" />
     <None Include="wwwroot\js\SoundScripts.js" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Update="wwwroot\Audio\InterspaceGarden.mp3">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\Audio\Unrestful.mp3">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
 </Project>

@@ -30,13 +30,6 @@ namespace RadioHeardleServer.Data
 			var fileName = ReadLine(songFile, fileNameIndex);
 			var songName = ReadLine(songFile, songNameIndex);
 
-			var timeUpdated = DateTime.Parse(ReadLine(lastUpdatedFile, 0));
-
-			if (!Debugger.IsAttached)
-				timeUpdated = timeUpdated.Add(serverTimeBehind);
-
-			Console.WriteLine(string.Format("{0}", timeUpdated));
-
 			return new SongData(fileName, songName);
 		}
 
@@ -54,7 +47,6 @@ namespace RadioHeardleServer.Data
 					var oldDate = DateTime.Parse(fileData);
 					TimeSpan dataAge = DateTime.Now - oldDate;
 
-					Console.WriteLine(dataAge);
 					if (dataAge > updateAfter)
 						return true;
 
@@ -97,12 +89,10 @@ namespace RadioHeardleServer.Data
 
 			var line = fileData[r.Next(fileData.Length)];
 			var data = line.Split("---");
-			Console.WriteLine(line);
 
 			if (data[0].Equals(currentSong))
 			{
 				line = fileData[r.Next(fileData.Length)];
-				Console.WriteLine(line);
 				data = line.Split("---");
 			}
 
@@ -142,8 +132,6 @@ namespace RadioHeardleServer.Data
 		private void WriteLine(string filename, int index, string line)
 		{
 			var lines = File.ReadAllLines(filename).ToList();
-
-			Console.WriteLine("Updating index {" + index + "} of file " + filename);
 
 			if (lines.Count < index + 1)
 			{
