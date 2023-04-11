@@ -13,6 +13,9 @@ namespace RadioHeardleServer.Data
 		private static int fileNameIndex = 0;
 		private static int songNameIndex = 1;
 
+		private static int updatedDateIndex = 0;
+		private static int versionIndex = 1;
+
 		private bool isProduction;
 
 		private string[] _songNamesList;
@@ -32,8 +35,9 @@ namespace RadioHeardleServer.Data
 			var songName = ReadLine(songFile, songNameIndex);
 			var songData = new SongData(fileName, songName);
 			var updated = GetTimeUpdated();
+			var version = GetVersion();
 
-			return new DisplayData(songData, updated);
+			return new DisplayData(songData, updated, version);
 		}
 
 		public List<string> GetSearchSongs(string searchStr)
@@ -67,21 +71,6 @@ namespace RadioHeardleServer.Data
 				return true;
 
 			return false;
-
-
-			//try
-			//{
-			//	TimeSpan dataAge = DateTime.Now - oldDate;
-
-			//	if (dataAge > updateAfter)
-			//		return true;
-
-			//	return false;
-			//}
-			//catch (Exception)
-			//{
-			//	return true;
-			//}
 		}
 
 		private void UpdateData()
@@ -90,7 +79,7 @@ namespace RadioHeardleServer.Data
 
 			if (song._fileName != null)
 			{
-				SetTimeUpdated();
+				UpdateVersionFile();
 				Write(songFile, song.ToString());
 			}
 		}
@@ -146,7 +135,7 @@ namespace RadioHeardleServer.Data
 				time = DateTime.Now.Subtract(new TimeSpan(50, 0, 0));
 			else
 			{
-				var line = ReadLine(lastUpdatedFile, 0);
+				var line = ReadLine(lastUpdatedFile, updatedDateIndex);
 
 				if (line.Length == 0)
 					time = DateTime.Now.Subtract(new TimeSpan(50, 0, 0));
@@ -160,13 +149,37 @@ namespace RadioHeardleServer.Data
 			return time;
 		}
 
-		private void SetTimeUpdated()
+		private int GetVersion()
+		{
+			DateTime time;
+
+			if (!FileExists(lastUpdatedFile))
+				return 1;
+			else
+			{
+				var line = ReadLine(lastUpdatedFile, versionIndex);
+
+				if (line == null || line.Trim().Length == 0)
+					return 1;
+				else
+					return int.Parse(line.Trim());
+			}
+		}
+
+		private void UpdateVersionFile()
 		{
 			var time = DateTime.Now;
 			if (isProduction)
-				Write(lastUpdatedFile, string.Format("{0}", time.Add(serverTimeBehind)));
+				WriteLine(lastUpdatedFile, updatedDateIndex, string.Format("{0}", time.Add(serverTimeBehind)));
 			else
-				Write(lastUpdatedFile, string.Format("{0}", time).ToString());
+				WriteLine(lastUpdatedFile, updatedDateIndex, string.Format("{0}", time).ToString());
+
+			int version = 1;
+			var versionLine = ReadLine(lastUpdatedFile, versionIndex);
+			if (versionLine != null && versionLine.Length > 0)
+				version = int.Parse(versionLine.Trim());
+
+			WriteLine(lastUpdatedFile, versionIndex, version.ToString());
 		}
 
 		private bool FileExists(string fileName)

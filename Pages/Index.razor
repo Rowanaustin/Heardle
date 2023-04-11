@@ -2,8 +2,12 @@
 @using MudBlazor
 @using RadioHeardleServer.Data;
 @using System.Globalization;
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProtectedSessionStorage ProtectedSessionStore
+
 @inject IJSRuntime JsRuntime;
 @inject FileOperationsService fileOperationsService;
+
 
 <PageTitle>Radioheardle</PageTitle>
 
@@ -25,13 +29,8 @@
 
 	<MudCard hidden="@GameCompleted">
 		<MudCardContent>
-			<MudStack Row=true Justify="Justify.SpaceEvenly">
-				<MudButton @onclick="@HandleOnSkip" Disabled="@GameCompleted">Skip</MudButton>
-				<MudIcon Icon="@_skipIcons[0]"></MudIcon>
-				<MudIcon Icon="@_skipIcons[1]"></MudIcon>
-				<MudIcon Icon="@_skipIcons[2]"></MudIcon>
-				<MudIcon Icon="@_skipIcons[3]"></MudIcon>
-				<MudIcon Icon="@_skipIcons[4]"></MudIcon>
+				<MudStack Row=true Justify="Justify.Center">
+				<MudButton @onclick="@HandleOnSkip" Disabled="@GameCompleted">@Skip</MudButton>
 			</MudStack>
 			<MudStack Row=true Spacing="4">
 					<MudAutocomplete T="string" @bind-Value="@GuessText" Disabled="@GameCompleted" SearchFunc="@AutoComplete" MaxItems=5>
@@ -77,6 +76,8 @@
 	public string GuessText { get; set; }
 	public string ResultText { get; set; }
 
+	public string Skip { get; set; } = "Skip";
+
 	private bool gameIncomplete = true;
 	private Color chipColor;
 	private string chipText;
@@ -96,6 +97,10 @@
 	private string _audioAddress;
 	private string _songName;
 	private string _editionDate;
+	private int _editionVersion;
+
+	private int _localVersion;
+	private int _localGuesses;
 
 	private bool _disposed;
 
@@ -108,7 +113,9 @@
 		if (firstRender)
 		{
 			_jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/SoundScripts.js");
-		}
+			await LoadLocalStorage();
+			HandleStorageState();
+		} 
 	}
 
 	protected override void OnInitialized()
@@ -118,15 +125,48 @@
 		_audioAddress = "./Audio/" + songData._songData._fileName;
 		_songName = songData._songData._songName;
 		_editionDate = songData._updateDate.DayOfWeek + " " + songData._updateDate.Date.ToString("d", new CultureInfo("en-uk"));
+		_editionVersion = songData._version;
 
 		_guessOrSkip = new();
+	}
 
-		Console.WriteLine(_songName);
 
-		for (var i = 0; i < _skipIcons.Length; i++)
-			_skipIcons[i] = Icons.Material.Filled.Lock;
+	private async void HandleStorageState()
+	{
+		if (_localVersion == _editionVersion)
+		{
+			Console.WriteLine("cookies match server version");
+			_skipLoc = _localGuesses;
+			Console.WriteLine("Local Guesses " + _localGuesses);
 
-		_skipIcons[0] = Icons.Material.Filled.LockOpen;
+			for (int i = 0; i <= _skipLoc; i++)
+			{
+				BufferValue += _bufferPart * _sectionDurations[i];
+			}
+		
+
+			HandleSkipPosition();
+		}
+		else
+		{
+			Console.WriteLine("cookies don't match server version");
+			await UpdateLocalStorage();
+		}
+	}
+
+	private async Task LoadLocalStorage()
+	{
+		var version = await ProtectedSessionStore.GetAsync<int>("version");
+		_localVersion = version.Success ? version.Value : 1;
+
+		var guesses = await ProtectedSessionStore.GetAsync<int>("guesses");
+		_localGuesses = guesses.Success ? guesses.Value : 0;
+	}
+
+	private async Task UpdateLocalStorage()
+	{
+		await ProtectedSessionStore.SetAsync("version", _editionVersion);
+		await ProtectedSessionStore.SetAsync("guesses", _skipLoc);
 	}
 
 	private async Task<IEnumerable<string>> AutoComplete(string search)
@@ -162,7 +202,9 @@
 	{
 		GuessText = string.Empty;
 		_guessOrSkip.Add(false);
-		MoveToNextSection();
+		_skipLoc += 1;
+		BufferValue += _bufferPart * _sectionDurations[_skipLoc];
+		HandleSkipPosition();
 	}
 
 	private void HandleOnGuess()
@@ -179,13 +221,15 @@
 		else
 		{
 			_guessOrSkip.Add(true);
-			MoveToNextSection();
-			StateHasChanged();
+			_skipLoc += 1;
+			BufferValue += _bufferPart * _sectionDurations[_skipLoc];
+			HandleSkipPosition();
 		}
 	}
 
-	private void MoveToNextSection()
+	private async void HandleSkipPosition()
 	{
+		await UpdateLocalStorage();
 		if (_skipLoc >= (_numGuesses - 1))
 		{
 			if (!GameCompleted)
@@ -194,13 +238,12 @@
 				CompleteGame(false);
 			}
 		}
-		else
+		else if (_skipLoc == _numGuesses - 2)
 		{
-			_skipLoc += 1;
-			BufferValue += _bufferPart * _sectionDurations[_skipLoc];
-			Console.WriteLine(BufferValue);
-			_skipIcons[_skipLoc] = Icons.Material.Filled.LockOpen;
+			Skip = "Give up";
 		}
+
+		StateHasChanged();
 	}
 
 	private void CompleteGame(bool win)
