@@ -53,6 +53,12 @@
 		</MudCardContent>
 	</MudCard>
 </MudStack>
+<MudCard>
+	<MudCardContent>
+		<MudText Typo="Typo.body2">Guessing or Skipping will unlock the next section of the preview.</MudText>
+				<MudText Typo="Typo.body2">(First 7 Albums)</MudText>
+	</MudCardContent>
+</MudCard>
 </MudContainer>
 
 <audio id="audioPlayer" src='@_audioAddress' />
@@ -168,13 +174,13 @@
 	private void HandleOnGuess()
 	{
 		var song = _songName.Trim();
-		var guess = GuessText == null ? "" : GuessText.Trim();
-		Console.WriteLine("GuessText = " + guess);
+		GuessText = GuessText == null ? "" : GuessText.Trim();
+		Console.WriteLine("GuessText = " + GuessText);
 
-		if (guess.Length == 0)
+		if (GuessText.Length == 0)
 			return;
 
-		if (string.Compare(guess, song, StringComparison.InvariantCultureIgnoreCase) == 0)
+		if (string.Compare(GuessText, song, StringComparison.InvariantCultureIgnoreCase) == 0)
 		{
 			CompleteGame(true);
 		}
@@ -182,6 +188,7 @@
 		{
 			HandleOnSkip();
 			GuessText = "";
+			StateHasChanged();
 		}
 	}
 
