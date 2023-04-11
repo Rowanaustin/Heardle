@@ -1,6 +1,7 @@
 ﻿@page "/"
 @using MudBlazor
 @using RadioHeardleServer.Data;
+@using System.Globalization;
 @inject IJSRuntime JsRuntime;
 @inject FileOperationsService fileOperationsService;
 
@@ -11,10 +12,13 @@
 	<MudCard>
 		<MudCardContent>
 			<MudText><h1>Radioheardle</h1></MudText>
-			<MudText>@_updatedTime</MudText>
-			<MudChip hidden="@gameIncomplete" Color="@chipColor" Text="@chipText"></MudChip>
+			<MudText>@_editionDate</MudText>
+			<MudStack Row=true>
+				<MudChip hidden="@gameIncomplete" Color="@chipColor" Text="@chipText"></MudChip>
+				<MudText hidden="@gameIncomplete" Align="Align.Center">@_songName</MudText>
+			</MudStack>
 			<MudProgressLinear Color="Color.Secondary" Value="@BufferValue" Class="my-7" Size="Size.Medium"/>
-				<MudProgressLinear Color="Color.Primary" Value="@Value" Class="my-7" Size="Size.Large" />
+			<MudProgressLinear Color="Color.Primary" Value="@Value" Class="my-7" Size="Size.Large" />
 			<MudSwitch @bind-Checked="@PlaySwitch" Label="Play" Color="Color.Success" />
 		</MudCardContent>
 	</MudCard>
@@ -22,7 +26,7 @@
 	<MudCard>
 		<MudCardContent>
 			<MudStack Row=true Justify="Justify.SpaceEvenly">
-				<MudButton @onclick="@HandleOnSkip">Skip</MudButton>
+				<MudButton @onclick="@HandleOnSkip" Disabled="@GameCompleted">Skip</MudButton>
 				<MudIcon Icon="@_skipIcons[0]"></MudIcon>
 				<MudIcon Icon="@_skipIcons[1]"></MudIcon>
 				<MudIcon Icon="@_skipIcons[2]"></MudIcon>
@@ -31,7 +35,7 @@
 			</MudStack>
 			<MudStack Row=true Spacing="4">
 				<!--<MudTextField @bind-Value="GuessText" Variant="Variant.Filled" ReadOnly="@GameCompleted">Guess...</MudTextField>-->
-				<MudAutocomplete T="string" @bind-Value="GuessText" ReadOnly="@GameCompleted" SearchFunc="@AutoComplete" MaxItems=5>
+					<MudAutocomplete T="string" @bind-Value="@GuessText" Disabled="@GameCompleted" SearchFunc="@AutoComplete" MaxItems=5>
 					<MoreItemsTemplate>
 						<MudText Align="Align.Center" Class="px-4 py-1">
 							...
@@ -49,7 +53,7 @@
 	</MudCard>
 	<MudCard>
 		<MudCardContent>
-			<MudTextField @bind-Value="ResultText" Variant="Variant.Outlined" hidden="@gameIncomplete" ReadOnly="true"></MudTextField>
+			<MudTextField @bind-Value="ResultText" Lines="3" Variant="Variant.Outlined" hidden="@gameIncomplete" ReadOnly="true"></MudTextField>
 		</MudCardContent>
 	</MudCard>
 </MudStack>
@@ -61,7 +65,7 @@
 </MudCard>
 </MudContainer>
 
-<audio id="audioPlayer" src='@_audioAddress' />
+<audio id="audioPlayer" src='@_audioAddress' type="audio/mpeg" />
 
 
 @code {
@@ -89,10 +93,11 @@
 	private string[] _skipIcons = new string[_numGuesses];
 
 	private int _skipLoc = 0;
+	private List<bool> _guessOrSkip;
 
 	private string _audioAddress;
 	private string _songName;
-	private string _updatedTime;
+	private string _editionDate;
 
 	private bool _disposed;
 
@@ -114,7 +119,9 @@
 
 		_audioAddress = "./Audio/" + songData._songData._fileName;
 		_songName = songData._songData._songName;
-		_updatedTime = songData._updateDate.Date.ToShortDateString();
+		_editionDate = songData._updateDate.DayOfWeek + " " + songData._updateDate.Date.ToString("d", new CultureInfo("en-uk"));
+
+		_guessOrSkip = new();
 
 		Console.WriteLine(_songName);
 
@@ -155,7 +162,33 @@
 
 	private void HandleOnSkip()
 	{
-		if (_skipLoc >= (_numGuesses-1))
+		GuessText = string.Empty;
+		_guessOrSkip.Add(false);
+		MoveToNextSection();
+	}
+
+	private void HandleOnGuess()
+	{
+		var song = _songName.Trim();
+
+		if (GuessText == null || GuessText.Length == 0)
+			return;
+
+		if (string.Compare(GuessText.Trim(), song, StringComparison.InvariantCultureIgnoreCase) == 0)
+		{
+			CompleteGame(true);
+		}
+		else
+		{
+			_guessOrSkip.Add(true);
+			MoveToNextSection();
+			StateHasChanged();
+		}
+	}
+
+	private void MoveToNextSection()
+	{
+		if (_skipLoc >= (_numGuesses - 1))
 		{
 			if (!GameCompleted)
 			{
@@ -171,53 +204,16 @@
 		}
 	}
 
-	private void HandleOnGuess()
-	{
-		var song = _songName.Trim();
-		GuessText = GuessText == null ? "" : GuessText.Trim();
-		Console.WriteLine("GuessText = " + GuessText);
-
-		if (GuessText.Length == 0)
-			return;
-
-		if (string.Compare(GuessText, song, StringComparison.InvariantCultureIgnoreCase) == 0)
-		{
-			CompleteGame(true);
-		}
-		else
-		{
-			HandleOnSkip();
-			GuessText = "";
-			StateHasChanged();
-		}
-	}
-
 	private void CompleteGame(bool win)
 	{
 		GuessText = _songName;
 		GameCompleted = true;
 
-		ResultText = GetResultText();
+		ResultText = ResultGenerator.GetResultText(_numGuesses, _guessOrSkip, _editionDate);
 
 		chipColor = win ? Color.Success : Color.Error;
 		chipText = win ? "Success" : "Failure";
 		gameIncomplete = false;
-	}
-
-	private string GetResultText()
-	{
-		var text = "Radioheardle " + _updatedTime + " ";
-		for (int i = 0; i < _numGuesses;i++)
-		{
-			if (i < _skipLoc)
-				text += "X";
-			else if (i == _skipLoc)
-				text += "O";
-			else
-				text += "-";
-		}
-
-		return text;
 	}
 
 	private void CallJsFunc(string funcName)
