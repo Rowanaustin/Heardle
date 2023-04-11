@@ -13,9 +13,9 @@
 		<MudCardContent>
 			<MudText><h1>Radioheardle</h1></MudText>
 			<MudText>@_editionDate</MudText>
-			<MudStack Row=true>
-				<MudChip hidden="@gameIncomplete" Color="@chipColor" Text="@chipText"></MudChip>
-				<MudText hidden="@gameIncomplete" Align="Align.Center">@_songName</MudText>
+			<MudText hidden="@gameIncomplete" Align="Align.Center" Typo="Typo.h4">@_songName</MudText>
+			<MudStack Justify="Justify.Center">
+				<MudChip hidden="@gameIncomplete"  Color="@chipColor" Text="@chipText"></MudChip>
 			</MudStack>
 			<MudProgressLinear Color="Color.Secondary" Value="@BufferValue" Class="my-7" Size="Size.Medium"/>
 			<MudProgressLinear Color="Color.Primary" Value="@Value" Class="my-7" Size="Size.Large" />
@@ -23,7 +23,7 @@
 		</MudCardContent>
 	</MudCard>
 
-	<MudCard>
+	<MudCard hidden="@GameCompleted">
 		<MudCardContent>
 			<MudStack Row=true Justify="Justify.SpaceEvenly">
 				<MudButton @onclick="@HandleOnSkip" Disabled="@GameCompleted">Skip</MudButton>
@@ -71,10 +71,14 @@
 @code {
 
 	private static int _numGuesses = 5;
+	private static int _totalSectionDuration = 20;
+	private static int[] _sectionDurations = new int[] { 1, 2, 3, 5, 9 };
+	private static float _bufferPart = 100 / _totalSectionDuration;
+	private static int _bufferTick = _totalSectionDuration * 10;
 
 	public bool GameCompleted { get; set; } = false;
 	public int Value { get; set; } = 0;
-	public int BufferValue { get; set; } = 100 / _numGuesses;
+	public float BufferValue { get; set; } = _bufferPart * _sectionDurations[0];
 
 	public string GuessText { get; set; }
 	public string ResultText { get; set; }
@@ -143,7 +147,7 @@
 			CallJsFunc("PlaySound");
 
 			//set timer
-			var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(160));
+			var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(_bufferTick));
 			while (await timer.WaitForNextTickAsync() && Value <= BufferValue)
 			{
 				Value += 1;
@@ -198,8 +202,9 @@
 		}
 		else
 		{
-			BufferValue += (100 / _numGuesses);
 			_skipLoc += 1;
+			BufferValue += _bufferPart * _sectionDurations[_skipLoc];
+			Console.WriteLine(BufferValue);
 			_skipIcons[_skipLoc] = Icons.Material.Filled.LockOpen;
 		}
 	}
