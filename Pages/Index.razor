@@ -15,7 +15,7 @@
 			<MudText>@_editionDate</MudText>
 			<MudText hidden="@gameIncomplete" Align="Align.Center" Typo="Typo.h4">@_songName</MudText>
 			<MudStack Justify="Justify.Center">
-				<MudChip hidden="@gameIncomplete"  Color="@chipColor" Text="@chipText"></MudChip>
+				<MudChip hidden="@gameIncomplete" Color="@chipColor" Text="@chipText"></MudChip>
 			</MudStack>
 			<MudProgressLinear Color="Color.Secondary" Value="@BufferValue" Class="my-7" Size="Size.Medium"/>
 			<MudProgressLinear Color="Color.Primary" Value="@Value" Class="my-7" Size="Size.Large" />
@@ -34,30 +34,24 @@
 				<MudIcon Icon="@_skipIcons[4]"></MudIcon>
 			</MudStack>
 			<MudStack Row=true Spacing="4">
-				<!--<MudTextField @bind-Value="GuessText" Variant="Variant.Filled" ReadOnly="@GameCompleted">Guess...</MudTextField>-->
 					<MudAutocomplete T="string" @bind-Value="@GuessText" Disabled="@GameCompleted" SearchFunc="@AutoComplete" MaxItems=5>
 					<MoreItemsTemplate>
 						<MudText Align="Align.Center" Class="px-4 py-1">
 							...
 						</MudText>
 					</MoreItemsTemplate>
-					<NoItemsTemplate>
-						<MudText Align="Align.Center" Class="px-4 py-1">
-							No songs match
-						</MudText>
-					</NoItemsTemplate>
 				</MudAutocomplete>
 				<MudButton @onclick="@HandleOnGuess" Disabled="@GameCompleted">Guess</MudButton>
 			</MudStack>
 		</MudCardContent>
 	</MudCard>
-	<MudCard>
+	<MudCard hidden="@gameIncomplete">
 		<MudCardContent>
-			<MudTextField @bind-Value="ResultText" Lines="3" Variant="Variant.Outlined" hidden="@gameIncomplete" ReadOnly="true"></MudTextField>
+			<MudTextField @bind-Value="ResultText" Lines="3" Variant="Variant.Outlined" ReadOnly="true"></MudTextField>
 		</MudCardContent>
 	</MudCard>
 </MudStack>
-<MudCard>
+<MudCard hidden="@GameCompleted">
 	<MudCardContent>
 		<MudText Typo="Typo.body2">Guessing or Skipping will unlock the next section of the preview.</MudText>
 				<MudText Typo="Typo.body2">(First 7 Albums)</MudText>
@@ -219,6 +213,7 @@
 		chipColor = win ? Color.Success : Color.Error;
 		chipText = win ? "Success" : "Failure";
 		gameIncomplete = false;
+		BufferValue = 100;
 	}
 
 	private void CallJsFunc(string funcName)
