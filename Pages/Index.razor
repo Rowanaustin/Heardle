@@ -13,23 +13,23 @@
 			<MudText><h1>Radioheardle</h1></MudText>
 			<MudText>@_updatedTime</MudText>
 			<MudChip hidden="@gameIncomplete" Color="@chipColor" Text="@chipText"></MudChip>
-			<MudProgressLinear Color="Color.Secondary" Value="@BufferValue" Class="my-7" />
-			<MudProgressLinear Color="Color.Primary" Value="@Value" Class="my-7" />
+			<MudProgressLinear Color="Color.Secondary" Value="@BufferValue" Class="my-7" Size="Size.Medium"/>
+				<MudProgressLinear Color="Color.Primary" Value="@Value" Class="my-7" Size="Size.Large" />
 			<MudSwitch @bind-Checked="@PlaySwitch" Label="Play" Color="Color.Success" />
 		</MudCardContent>
 	</MudCard>
 
 	<MudCard>
 		<MudCardContent>
-			<MudButton @onclick="@HandleOnSkip">Skip</MudButton>
-			<MudStack Row=true>
+			<MudStack Row=true Justify="Justify.SpaceEvenly">
+				<MudButton @onclick="@HandleOnSkip">Skip</MudButton>
 				<MudIcon Icon="@_skipIcons[0]"></MudIcon>
 				<MudIcon Icon="@_skipIcons[1]"></MudIcon>
 				<MudIcon Icon="@_skipIcons[2]"></MudIcon>
 				<MudIcon Icon="@_skipIcons[3]"></MudIcon>
 				<MudIcon Icon="@_skipIcons[4]"></MudIcon>
 			</MudStack>
-			<MudStack Row=true>
+			<MudStack Row=true Spacing="4">
 				<!--<MudTextField @bind-Value="GuessText" Variant="Variant.Filled" ReadOnly="@GameCompleted">Guess...</MudTextField>-->
 				<MudAutocomplete T="string" @bind-Value="GuessText" ReadOnly="@GameCompleted" SearchFunc="@AutoComplete" MaxItems=5>
 					<MoreItemsTemplate>
