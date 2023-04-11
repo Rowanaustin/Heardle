@@ -1,21 +1,26 @@
-﻿namespace RadioHeardleServer.Data
+﻿using static MudBlazor.Colors;
+
+namespace RadioHeardleServer.Data
 {
 	public class FileOperationsService
 	{
 		private static string songFile = "Data/currentSong.txt";
 		private static string lastUpdatedFile = "Data/lastUpdated.txt";
 		private static string songListFile = "Data/songList.txt";
-		private static readonly TimeSpan updateAfter = new TimeSpan(1, 0, 0);
-		private static readonly TimeSpan serverTimeBehind = new TimeSpan(0, 15, 0);
+		private static readonly TimeSpan updateAfter = new TimeSpan(0, 2, 0);
+		private static readonly TimeSpan serverTimeBehind = new TimeSpan(8, 0, 0);
 
 		private static int fileNameIndex = 0;
 		private static int songNameIndex = 1;
 
 		private bool isProduction;
 
+		private string[] _songNamesList;
+
 		public FileOperationsService(bool production)
 		{
 			isProduction = production;
+			_songNamesList = GetSongNameList();
 		}
 
 		public DisplayData GetData()
@@ -29,6 +34,11 @@
 			var updated = GetTimeUpdated();
 
 			return new DisplayData(songData, updated);
+		}
+
+		public List<string> GetSearchSongs(string searchStr)
+		{
+			return _songNamesList.Where(s => s.Contains(searchStr, StringComparison.InvariantCultureIgnoreCase)).ToList();
 		}
 
 		private bool NeedNewData()
@@ -108,6 +118,15 @@
 			}
 
 			return new SongData(data);
+		}
+
+		private string[] GetSongNameList()
+		{
+			var fileData = ReadLines(songListFile);
+
+			var names = fileData.Select(d => d.Split("---")[1]).ToArray();
+
+			return names;
 		}
 
 		private DateTime GetUkDateTime()

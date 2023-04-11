@@ -6,7 +6,7 @@
 
 <PageTitle>Radioheardle</PageTitle>
 
-
+<MudContainer MaxWidth="MaxWidth.Small">
 <MudStack>
 	<MudCard>
 		<MudCardContent>
@@ -30,7 +30,19 @@
 				<MudIcon Icon="@_skipIcons[4]"></MudIcon>
 			</MudStack>
 			<MudStack Row=true>
-				<MudTextField @bind-Value="GuessText" Variant="Variant.Filled" ReadOnly="@GameCompleted">Guess...</MudTextField>
+				<!--<MudTextField @bind-Value="GuessText" Variant="Variant.Filled" ReadOnly="@GameCompleted">Guess...</MudTextField>-->
+				<MudAutocomplete T="string" @bind-Value="GuessText" ReadOnly="@GameCompleted" SearchFunc="@AutoComplete" MaxItems=5>
+					<MoreItemsTemplate>
+						<MudText Align="Align.Center" Class="px-4 py-1">
+							...
+						</MudText>
+					</MoreItemsTemplate>
+					<NoItemsTemplate>
+						<MudText Align="Align.Center" Class="px-4 py-1">
+							No songs match
+						</MudText>
+					</NoItemsTemplate>
+				</MudAutocomplete>
 				<MudButton @onclick="@HandleOnGuess" Disabled="@GameCompleted">Guess</MudButton>
 			</MudStack>
 		</MudCardContent>
@@ -41,6 +53,7 @@
 		</MudCardContent>
 	</MudCard>
 </MudStack>
+</MudContainer>
 
 <audio id="audioPlayer" src='@_audioAddress' />
 
@@ -95,7 +108,7 @@
 
 		_audioAddress = "./Audio/" + songData._songData._fileName;
 		_songName = songData._songData._songName;
-		_updatedTime = songData._updateDate.Date.ToShortTimeString();
+		_updatedTime = songData._updateDate.Date.ToShortDateString();
 
 		Console.WriteLine(_songName);
 
@@ -103,6 +116,11 @@
 			_skipIcons[i] = Icons.Material.Filled.Lock;
 
 		_skipIcons[0] = Icons.Material.Filled.LockOpen;
+	}
+
+	private async Task<IEnumerable<string>> AutoComplete(string search)
+	{
+		return fileOperationsService.GetSearchSongs(search);
 	}
 
 	private async void HandleOnPlayChanged()
@@ -149,12 +167,22 @@
 
 	private void HandleOnGuess()
 	{
-		var trimmed = _songName.Trim();
-		GuessText = GuessText == null ? "" : GuessText;
-		if (string.Compare(GuessText, trimmed, true) == 0)
+		var song = _songName.Trim();
+		var guess = GuessText == null ? "" : GuessText.Trim();
+		Console.WriteLine("GuessText = " + guess);
+
+		if (guess.Length == 0)
+			return;
+
+		if (string.Compare(guess, song, StringComparison.InvariantCultureIgnoreCase) == 0)
+		{
 			CompleteGame(true);
+		}
 		else
+		{
+			HandleOnSkip();
 			GuessText = "";
+		}
 	}
 
 	private void CompleteGame(bool win)
@@ -171,7 +199,7 @@
 
 	private string GetResultText()
 	{
-		var text = "Radioheardle: ";
+		var text = "Radioheardle " + _updatedTime + " ";
 		for (int i = 0; i < _numGuesses;i++)
 		{
 			if (i < _skipLoc)
