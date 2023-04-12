@@ -65,7 +65,7 @@
 
 	private static int _numGuesses = 5;
 	private static int _totalSectionDuration = 20;
-	private static int[] _sectionDurations = new int[] { 1, 2, 3, 5, 9 };
+	private static int[] _sectionDurations = new int[] { 1, 2, 3, 5, 9, 0 };
 	private static float _bufferPart = 100 / _totalSectionDuration;
 	private static int _bufferTick = _totalSectionDuration * 10;
 
@@ -91,8 +91,7 @@
 
 	private string[] _skipIcons = new string[_numGuesses];
 
-	private int _skipLoc = 0;
-	private List<bool> _guessOrSkip;
+	private string _guesses = "";
 
 	private string _audioAddress;
 	private string _songName;
@@ -100,7 +99,8 @@
 	private int _editionVersion;
 
 	private int _localVersion;
-	private int _localGuesses;
+	private string _localGuesses;
+	private bool _localGameComplete;
 
 	private bool _disposed;
 
@@ -126,8 +126,6 @@
 		_songName = songData._songData._songName;
 		_editionDate = songData._updateDate.DayOfWeek + " " + songData._updateDate.Date.ToString("d", new CultureInfo("en-uk"));
 		_editionVersion = songData._version;
-
-		_guessOrSkip = new();
 	}
 
 
@@ -135,17 +133,17 @@
 	{
 		if (_localVersion == _editionVersion)
 		{
-			Console.WriteLine("cookies match server version");
-			_skipLoc = _localGuesses;
-			Console.WriteLine("Local Guesses " + _localGuesses);
+			_guesses = _localGuesses;
 
-			for (int i = 0; i <= _skipLoc; i++)
+			for (int i = 0; i <= _guesses.Length; i++)
 			{
 				BufferValue += _bufferPart * _sectionDurations[i];
 			}
-		
 
 			HandleSkipPosition();
+
+			if (_localGameComplete)
+				CompleteGame();
 		}
 		else
 		{
@@ -159,14 +157,18 @@
 		var version = await ProtectedSessionStore.GetAsync<int>("version");
 		_localVersion = version.Success ? version.Value : 1;
 
-		var guesses = await ProtectedSessionStore.GetAsync<int>("guesses");
-		_localGuesses = guesses.Success ? guesses.Value : 0;
+		var guesses = await ProtectedSessionStore.GetAsync<string>("guesses");
+		_localGuesses = guesses.Success && guesses.Value!=null ? guesses.Value : "";
+
+		var complete = await ProtectedSessionStore.GetAsync<bool>("gameComplete");
+		_localGameComplete = complete.Success ? complete.Value : false;
 	}
 
 	private async Task UpdateLocalStorage()
 	{
 		await ProtectedSessionStore.SetAsync("version", _editionVersion);
-		await ProtectedSessionStore.SetAsync("guesses", _skipLoc);
+		await ProtectedSessionStore.SetAsync("guesses", _guesses);
+		await ProtectedSessionStore.SetAsync("gameComplete", GameCompleted);
 	}
 
 	private async Task<IEnumerable<string>> AutoComplete(string search)
@@ -201,9 +203,8 @@
 	private void HandleOnSkip()
 	{
 		GuessText = string.Empty;
-		_guessOrSkip.Add(false);
-		_skipLoc += 1;
-		BufferValue += _bufferPart * _sectionDurations[_skipLoc];
+		_guesses += 's';
+		BufferValue += _bufferPart * _sectionDurations[_guesses.Length];
 		HandleSkipPosition();
 	}
 
@@ -216,42 +217,46 @@
 
 		if (string.Compare(GuessText.Trim(), song, StringComparison.InvariantCultureIgnoreCase) == 0)
 		{
-			CompleteGame(true);
+			_guesses += 'w';
+			CompleteGame();
+			UpdateLocalStorage();
 		}
 		else
 		{
-			_guessOrSkip.Add(true);
-			_skipLoc += 1;
-			BufferValue += _bufferPart * _sectionDurations[_skipLoc];
+			_guesses += 'g';
+			BufferValue += _bufferPart * _sectionDurations[_guesses.Length];
 			HandleSkipPosition();
 		}
 	}
 
 	private async void HandleSkipPosition()
 	{
-		await UpdateLocalStorage();
-		if (_skipLoc >= (_numGuesses - 1))
+		if (_guesses.Length >= (_numGuesses))
 		{
 			if (!GameCompleted)
 			{
-				_skipLoc = _numGuesses;
-				CompleteGame(false);
+				CompleteGame();
+				await UpdateLocalStorage();
 			}
 		}
-		else if (_skipLoc == _numGuesses - 2)
+		else if (_guesses.Length == _numGuesses - 1)
 		{
 			Skip = "Give up";
 		}
 
+		await UpdateLocalStorage();
+
 		StateHasChanged();
 	}
 
-	private void CompleteGame(bool win)
+	private void CompleteGame()
 	{
+		var win = _guesses.EndsWith('w');
+
 		GuessText = _songName;
 		GameCompleted = true;
 
-		ResultText = ResultGenerator.GetResultText(_numGuesses, _guessOrSkip, _editionDate);
+		ResultText = ResultGenerator.GetResultText(_numGuesses, _guesses, _editionDate);
 
 		chipColor = win ? Color.Success : Color.Error;
 		chipText = win ? "Success" : "Failure";

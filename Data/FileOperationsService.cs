@@ -177,7 +177,7 @@ namespace RadioHeardleServer.Data
 			int version = 1;
 			var versionLine = ReadLine(lastUpdatedFile, versionIndex);
 			if (versionLine != null && versionLine.Length > 0)
-				version = int.Parse(versionLine.Trim());
+				version = int.Parse(versionLine.Trim()) + 1;
 
 			WriteLine(lastUpdatedFile, versionIndex, version.ToString());
 		}
