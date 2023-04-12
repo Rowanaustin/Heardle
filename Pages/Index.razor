@@ -11,51 +11,60 @@
 
 <PageTitle>Radioheardle</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Small">
-<MudStack>
-	<MudCard>
-		<MudCardContent>
-			<MudText><h1>Radioheardle</h1></MudText>
-			<MudText>@_editionDate</MudText>
-			<MudText hidden="@gameIncomplete" Align="Align.Center" Typo="Typo.h4">@_songName</MudText>
-			<MudStack Justify="Justify.Center">
-				<MudChip hidden="@gameIncomplete" Color="@chipColor" Text="@chipText"></MudChip>
-			</MudStack>
-			<MudProgressLinear Color="Color.Secondary" Value="@BufferValue" Class="my-7" Size="Size.Medium"/>
-			<MudProgressLinear Color="Color.Primary" Value="@Value" Class="my-7" Size="Size.Large" />
-			<MudSwitch @bind-Checked="@PlaySwitch" Label="Play" Color="Color.Success" />
-		</MudCardContent>
-	</MudCard>
 
-	<MudCard hidden="@GameCompleted">
-		<MudCardContent>
-				<MudStack Row=true Justify="Justify.Center">
-				<MudButton @onclick="@HandleOnSkip" Disabled="@GameCompleted">@Skip</MudButton>
-			</MudStack>
-			<MudStack Row=true Spacing="4">
-					<MudAutocomplete T="string" @bind-Value="@GuessText" Disabled="@GameCompleted" SearchFunc="@AutoComplete" MaxItems=5>
-					<MoreItemsTemplate>
-						<MudText Align="Align.Center" Class="px-4 py-1">
-							...
-						</MudText>
-					</MoreItemsTemplate>
-				</MudAutocomplete>
-				<MudButton @onclick="@HandleOnGuess" Disabled="@GameCompleted">Guess</MudButton>
-			</MudStack>
-		</MudCardContent>
-	</MudCard>
-	<MudCard hidden="@gameIncomplete">
-		<MudCardContent>
-			<MudTextField @bind-Value="ResultText" Lines="3" Variant="Variant.Outlined" Label="Copy this text to show your mates" ReadOnly="true"></MudTextField>
-		</MudCardContent>
-	</MudCard>
-</MudStack>
-<MudCard hidden="@GameCompleted">
-	<MudCardContent>
-		<MudText Typo="Typo.body2">Guessing or Skipping will unlock the next section of the preview.</MudText>
-				<MudText Typo="Typo.body2">(First 7 Albums)</MudText>
-	</MudCardContent>
-</MudCard>
+<MudContainer MaxWidth="MaxWidth.Small">
+	<MudStack Justify="Justify.Center">
+		<MudCard hidden="@loaded">
+			<MudCardContent>
+				<MudText Align="Align.Center" Typo="Typo.body1">Loading...</MudText>
+			</MudCardContent>
+		</MudCard>
+	</MudStack>
+	<MudContainer hidden="@loading">
+	<MudStack>
+		<MudCard >
+			<MudCardContent>
+				<MudText><h1>Radioheardle</h1></MudText>
+				<MudText>@_editionDate</MudText>
+				<MudText hidden="@gameIncomplete" Align="Align.Center" Typo="Typo.h4">@_songName</MudText>
+				<MudStack Justify="Justify.Center">
+					<MudChip hidden="@gameIncomplete" Color="@chipColor" Text="@chipText"></MudChip>
+				</MudStack>
+				<MudProgressLinear Color="@BarColour" Value="@BufferValue" Class="my-7" Size="Size.Medium" />
+				<MudProgressLinear Color="Color.Primary" Value="@Value" Class="my-7" Size="Size.Large" />
+				<MudSwitch @bind-Checked="@PlaySwitch" Label="Play" Color="Color.Success" />
+			</MudCardContent>
+		</MudCard>
+
+		<MudCard hidden="@GameCompleted">
+			<MudCardContent>
+				<MudStack Row=true Spacing="4">
+						<MudAutocomplete T="string" @bind-Value="@GuessText" Disabled="@GameCompleted" SearchFunc="@AutoComplete" MaxItems=5>
+						<MoreItemsTemplate>
+							<MudText Align="Align.Center" Class="px-4 py-1">
+								...
+							</MudText>
+						</MoreItemsTemplate>
+					</MudAutocomplete>
+					<MudButton @onclick="@HandleOnGuess" Disabled="@GameCompleted">Guess</MudButton>
+					<MudButton @onclick="@HandleOnSkip" Disabled="@GameCompleted">@Skip</MudButton>
+				</MudStack>
+			</MudCardContent>
+		</MudCard>
+		<MudCard hidden="@gameIncomplete">
+			<MudCardContent>
+				<MudTextField @bind-Value="ResultText" Lines="3" Variant="Variant.Outlined" Label="Copy this text to show your mates" ReadOnly="true"></MudTextField>
+			</MudCardContent>
+		</MudCard>
+
+		<MudCard hidden="@GameCompleted">
+			<MudCardContent>
+				<MudText Typo="Typo.body2">Guessing or Skipping will unlock the next section of the preview.</MudText>
+						<MudText Typo="Typo.body2">(First 7 Albums)</MudText>
+			</MudCardContent>
+		</MudCard>
+	</MudStack>
+	</MudContainer>
 </MudContainer>
 
 <audio id="audioPlayer" src='@_audioAddress' type="audio/mpeg" />
@@ -75,6 +84,7 @@
 
 	public string GuessText { get; set; }
 	public string ResultText { get; set; }
+	public Color BarColour { get; set; } = Color.Success;
 
 	public string Skip { get; set; } = "Skip";
 
@@ -101,6 +111,9 @@
 	private int _localVersion;
 	private string _localGuesses;
 	private bool _localGameComplete;
+
+	private bool loading = true;
+	private bool loaded = false;
 
 	private bool _disposed;
 
@@ -150,6 +163,9 @@
 			Console.WriteLine("cookies don't match server version");
 			await UpdateLocalStorage();
 		}
+
+		loading = false;
+		loaded = true;
 	}
 
 	private async Task LoadLocalStorage()
@@ -231,6 +247,28 @@
 
 	private async void HandleSkipPosition()
 	{
+		switch (_guesses.Length)
+		{
+			case 0:
+				BarColour = Color.Success;
+				break;
+			case 1:
+				BarColour = Color.Info;
+				break;
+			case 2:
+				BarColour = Color.Warning;
+				break;
+			case 3:
+				BarColour = Color.Secondary;
+				break;
+			case 4:
+				BarColour = Color.Error;
+				break;
+			default:
+				BarColour = Color.Primary;
+				break;
+		}
+
 		if (_guesses.Length >= (_numGuesses))
 		{
 			if (!GameCompleted)
@@ -260,6 +298,7 @@
 
 		chipColor = win ? Color.Success : Color.Error;
 		chipText = win ? "Success" : "Failure";
+		BarColour = Color.Primary;
 		gameIncomplete = false;
 		BufferValue = 100;
 	}
