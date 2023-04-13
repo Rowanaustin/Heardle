@@ -248,6 +248,8 @@
 		GuessText = string.Empty;
 		_guesses += 's';
 		BufferValue += _bufferPart * _sectionDurations[_guesses.Length];
+		if (_guesses.Length >= (_numGuesses))
+			_localResults[0] += 1;
 		HandleSkipPosition();
 	}
 
@@ -270,6 +272,8 @@
 		{
 			_guesses += 'g';
 			BufferValue += _bufferPart * _sectionDurations[_guesses.Length];
+			if (_guesses.Length >= (_numGuesses))
+				_localResults[0] += 1;
 			HandleSkipPosition();
 		}
 	}
@@ -302,7 +306,6 @@
 		{
 			if (!GameCompleted)
 			{
-				_localResults[0] += 1;
 				CompleteGame();
 			}
 		}
