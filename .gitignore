@@ -36,7 +36,7 @@ bld/
 
 # Program stuff
 wwwroot/Audio/
-Data/
+Data/*.txt
 
 # Visual Studio 2017 auto generated files
 Generated\ Files/
