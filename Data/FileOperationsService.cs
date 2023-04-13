@@ -1,6 +1,4 @@
-﻿using static MudBlazor.Colors;
-
-namespace RadioHeardleServer.Data
+﻿namespace RadioHeardleServer.Data
 {
 	public class FileOperationsService
 	{
@@ -137,10 +135,10 @@ namespace RadioHeardleServer.Data
 			{
 				var line = ReadLine(lastUpdatedFile, updatedDateIndex);
 
-				if (line.Length == 0)
-					time = DateTime.Now.Subtract(new TimeSpan(50, 0, 0));
+				if (DateTime.TryParse(line, out time))
+					return time;
 				else
-					return DateTime.Parse(line);
+					time = DateTime.Now.Subtract(new TimeSpan(50, 0, 0));
 			}
 
 			if (isProduction)
@@ -169,6 +167,9 @@ namespace RadioHeardleServer.Data
 		private void UpdateVersionFile()
 		{
 			var time = DateTime.Now;
+			if (!FileExists(lastUpdatedFile))
+				Write(lastUpdatedFile, "");
+
 			if (isProduction)
 				WriteLine(lastUpdatedFile, updatedDateIndex, string.Format("{0}", time.Add(serverTimeBehind)));
 			else
@@ -177,7 +178,8 @@ namespace RadioHeardleServer.Data
 			int version = 1;
 			var versionLine = ReadLine(lastUpdatedFile, versionIndex);
 			if (versionLine != null && versionLine.Length > 0)
-				version = int.Parse(versionLine.Trim()) + 1;
+				if (int.TryParse(versionLine.Trim(), out var fileVersion))
+					version = fileVersion + 1;
 
 			WriteLine(lastUpdatedFile, versionIndex, version.ToString());
 		}

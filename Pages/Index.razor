@@ -53,7 +53,7 @@
 		</MudCard>
 		<MudCard hidden="@gameIncomplete">
 			<MudCardContent>
-				<MudTextField @bind-Value="ResultText" Lines="3" Variant="Variant.Outlined" Label="Copy this text to show your mates" ReadOnly="true"></MudTextField>
+				<MudTextField @bind-Value="ResultText" Lines="4" Variant="Variant.Outlined" Label="Copy this text to show your mates" ReadOnly="true"></MudTextField>
 			</MudCardContent>
 		</MudCard>
 
@@ -117,6 +117,7 @@
 	private string _songName;
 	private string _editionDate;
 	private int _editionVersion;
+	private int[] _currentResults;
 
 	private int _localVersion;
 	private string _localGuesses;
@@ -139,18 +140,16 @@
 		DisableLegend = true
 	};
 
-
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)
 		{
-			_jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/SoundScripts.js");
 			await LoadLocalStorage();
-			HandleStorageState();
+			await HandleStorageState();
 		} 
 	}
 
-	protected override void OnInitialized()
+	protected override async Task OnInitializedAsync()
 	{
 		var songData = fileOperationsService.GetData();
 		RefreshChartSeries();
@@ -158,13 +157,18 @@
 		_songName = songData._songData._songName;
 		_editionDate = songData._updateDate.DayOfWeek + " " + songData._updateDate.Date.ToString("d", new CultureInfo("en-GB"));
 		_editionVersion = songData._version;
+
+		_jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/SoundScripts.js");
 	}
 
 
-	private async void HandleStorageState()
+	private async Task HandleStorageState()
 	{
 		Console.WriteLine("Cookies version: " + _localVersion);
 		Console.WriteLine("Server version: " + _editionVersion);
+
+		_currentResults = _localResults;
+
 		if (_localVersion == _editionVersion)
 		{
 			_guesses = _localGuesses;
@@ -193,17 +197,82 @@
 
 	private async Task LoadLocalStorage()
 	{
-		var version = await ProtectedLocalStore.GetAsync<int>("version");
-		_localVersion = version.Success ? version.Value : 1;
+		try
+		{
+			var version = await ProtectedLocalStore.GetAsync<int>("version");
+			_localVersion = version.Success ? version.Value : 1;
+		}
+		catch (Exception e)
+		{
+			await JsRuntime.InvokeVoidAsync("console.log", $"ProtectedLocalStore error: {e.Message}");
+			try
+			{
+				await ProtectedLocalStore.DeleteAsync("version");
+			}
+			catch (Exception iex)
+			{
+				await JsRuntime.InvokeVoidAsync("console.log", $"Browser storage Delete error: {iex.Message}");
+			}
 
-		var guesses = await ProtectedLocalStore.GetAsync<string>("guesses");
-		_localGuesses = guesses.Success && guesses.Value!=null ? guesses.Value : "";
+			_localVersion = 1;
+		}
 
-		var complete = await ProtectedLocalStore.GetAsync<bool>("gameComplete");
-		_localGameComplete = complete.Success ? complete.Value : false;
+		try
+		{
+			var guesses = await ProtectedLocalStore.GetAsync<string>("guesses");
+			_localGuesses = guesses.Success && guesses.Value != null ? guesses.Value : "";
+		}
+		catch (Exception e)
+		{
+			await JsRuntime.InvokeVoidAsync("console.log", $"ProtectedLocalStore error: {e.Message}");
+			try
+			{
+				await ProtectedLocalStore.DeleteAsync("guesses");
+			}
+			catch (Exception iex)
+			{
+				await JsRuntime.InvokeVoidAsync("console.log", $"Browser storage Delete error: {iex.Message}");
+			}
+			_localGuesses = "";
+		}
 
-		var results = await ProtectedLocalStore.GetAsync<int[]>("results");
-		_localResults = results.Success && results.Value != null ? results.Value : new int[6];
+		try
+		{
+			var complete = await ProtectedLocalStore.GetAsync<bool>("gameComplete");
+			_localGameComplete = complete.Success ? complete.Value : false;
+		}
+		catch(Exception e)
+		{
+			await JsRuntime.InvokeVoidAsync("console.log", $"ProtectedLocalStore error: {e.Message}");
+			try
+			{
+				await ProtectedLocalStore.DeleteAsync("gameComplete");
+			}
+			catch (Exception iex)
+			{
+				await JsRuntime.InvokeVoidAsync("console.log", $"Browser storage Delete error: {iex.Message}");
+			}
+			_localGameComplete = false;
+		}
+
+		try
+		{
+			var results = await ProtectedLocalStore.GetAsync<int[]>("results");
+			_localResults = results.Success && results.Value != null ? results.Value : new int[6];
+		}
+		catch (Exception e)
+		{
+			await JsRuntime.InvokeVoidAsync("console.log", $"ProtectedLocalStore error: {e.Message}");
+			try
+			{
+				await ProtectedLocalStore.DeleteAsync("results");
+			}
+			catch (Exception iex)
+			{
+				await JsRuntime.InvokeVoidAsync("console.log", $"Browser storage Delete error: {iex.Message}");
+			}
+			_localResults = new int[6];
+		}
 	}
 
 	private async Task UpdateLocalStorage()
@@ -211,7 +280,7 @@
 		await ProtectedLocalStore.SetAsync("version", _editionVersion);
 		await ProtectedLocalStore.SetAsync("guesses", _guesses);
 		await ProtectedLocalStore.SetAsync("gameComplete", GameCompleted);
-		await ProtectedLocalStore.SetAsync("results", _localResults);
+		await ProtectedLocalStore.SetAsync("results", _currentResults);
 	}
 
 	private async Task<IEnumerable<string>> AutoComplete(string search)
@@ -253,7 +322,7 @@
 		HandleSkipPosition();
 	}
 
-	private void HandleOnGuess()
+	private async void HandleOnGuess()
 	{
 		var song = _songName.Trim();
 
@@ -266,7 +335,7 @@
 			_localResults[_guesses.Length] += 1;
 	
 			CompleteGame();
-			UpdateLocalStorage();
+			await UpdateLocalStorage();
 		}
 		else
 		{
