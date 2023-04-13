@@ -39,22 +39,29 @@
 		<MudCard hidden="@GameCompleted">
 			<MudCardContent>
 				<MudStack Row=true Spacing="4">
-						<MudAutocomplete T="string" @bind-Value="@GuessText" Disabled="@GameCompleted" SearchFunc="@AutoComplete" MaxItems=5>
+					<MudButton @onclick="@HandleOnSkip" Disabled="@GameCompleted">@Skip</MudButton>
+					<MudButton @onclick="@HandleOnGuess" Disabled="@GameCompleted">Guess</MudButton>
+				</MudStack>
+				<MudAutocomplete T="string" @bind-Value="@GuessText" Disabled="@GameCompleted" SearchFunc="@AutoComplete" MaxItems=5>
 						<MoreItemsTemplate>
 							<MudText Align="Align.Center" Class="px-4 py-1">
 								...
 							</MudText>
 						</MoreItemsTemplate>
 					</MudAutocomplete>
-					<MudButton @onclick="@HandleOnGuess" Disabled="@GameCompleted">Guess</MudButton>
-					<MudButton @onclick="@HandleOnSkip" Disabled="@GameCompleted">@Skip</MudButton>
-				</MudStack>
 			</MudCardContent>
 		</MudCard>
 		<MudCard hidden="@gameIncomplete">
 			<MudCardContent>
 				<MudTextField @bind-Value="ResultText" Lines="3" Variant="Variant.Outlined" Label="Copy this text to show your mates" ReadOnly="true"></MudTextField>
 			</MudCardContent>
+		</MudCard>
+
+		<MudCard hidden="@gameIncomplete">
+			<MudCardContent>
+					<MudText>Guess Distribution</MudText>
+					<MudChart ChartType="ChartType.Bar" ChartOptions="@chartOptions" ChartSeries="@Series" XAxisLabels="@XAxisLabels" Width="100%" Height="350px"></MudChart>
+				</MudCardContent>
 		</MudCard>
 
 		<MudCard hidden="@GameCompleted">
@@ -81,6 +88,9 @@
 	public bool GameCompleted { get; set; } = false;
 	public int Value { get; set; } = 0;
 	public float BufferValue { get; set; } = _bufferPart * _sectionDurations[0];
+
+	public List<ChartSeries> Series { get; set; }
+	public string[] XAxisLabels { get; set; }
 
 	public string GuessText { get; set; }
 	public string ResultText { get; set; }
@@ -111,6 +121,7 @@
 	private int _localVersion;
 	private string _localGuesses;
 	private bool _localGameComplete;
+	private int[] _localResults;
 
 	private bool loading = true;
 	private bool loaded = false;
@@ -120,6 +131,14 @@
 	public void Dispose() => _disposed = true;
 
 	private IJSObjectReference _jsModule;
+
+	private ChartOptions chartOptions = new ChartOptions()
+	{
+		LineStrokeWidth = 10.0,
+		YAxisTicks = 1,
+		DisableLegend = true
+	};
+
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -134,7 +153,7 @@
 	protected override void OnInitialized()
 	{
 		var songData = fileOperationsService.GetData();
-
+		RefreshChartSeries();
 		_audioAddress = "./Audio/" + songData._songData._fileName;
 		_songName = songData._songData._songName;
 		_editionDate = songData._updateDate.DayOfWeek + " " + songData._updateDate.Date.ToString("d", new CultureInfo("en-GB"));
@@ -182,6 +201,9 @@
 
 		var complete = await ProtectedLocalStore.GetAsync<bool>("gameComplete");
 		_localGameComplete = complete.Success ? complete.Value : false;
+
+		var results = await ProtectedLocalStore.GetAsync<int[]>("results");
+		_localResults = results.Success && results.Value != null ? results.Value : new int[6];
 	}
 
 	private async Task UpdateLocalStorage()
@@ -189,6 +211,7 @@
 		await ProtectedLocalStore.SetAsync("version", _editionVersion);
 		await ProtectedLocalStore.SetAsync("guesses", _guesses);
 		await ProtectedLocalStore.SetAsync("gameComplete", GameCompleted);
+		await ProtectedLocalStore.SetAsync("results", _localResults);
 	}
 
 	private async Task<IEnumerable<string>> AutoComplete(string search)
@@ -238,6 +261,8 @@
 		if (string.Compare(GuessText.Trim(), song, StringComparison.InvariantCultureIgnoreCase) == 0)
 		{
 			_guesses += 'w';
+			_localResults[_guesses.Length] += 1;
+	
 			CompleteGame();
 			UpdateLocalStorage();
 		}
@@ -277,8 +302,8 @@
 		{
 			if (!GameCompleted)
 			{
+				_localResults[0] += 1;
 				CompleteGame();
-				await UpdateLocalStorage();
 			}
 		}
 		else if (_guesses.Length == _numGuesses - 1)
@@ -298,6 +323,8 @@
 		GuessText = _songName;
 		GameCompleted = true;
 
+		RefreshChartSeries();
+
 		ResultText = ResultGenerator.GetResultText(_numGuesses, _guesses, _editionDate);
 
 		chipColor = win ? Color.Success : Color.Error;
@@ -305,6 +332,18 @@
 		BarColour = Color.Primary;
 		gameIncomplete = false;
 		BufferValue = 100;
+	}
+
+	private void RefreshChartSeries()
+	{
+		var results = _localResults != null ? _localResults : new int[6];
+		var doubleArray = results.Select(x => (double)x).ToArray();
+		Series = new List<ChartSeries>()
+		{
+			new ChartSeries() { Name = "Guess Distribution", Data = doubleArray }
+		};
+
+		XAxisLabels = new string[]{ "Fail", "1", "2", "3", "4", "5" };
 	}
 
 	private void CallJsFunc(string funcName)
