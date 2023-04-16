@@ -296,7 +296,7 @@
 
 			//set timer
 			var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(_bufferTick));
-			while (await timer.WaitForNextTickAsync() && Value <= BufferValue)
+			while (await timer.WaitForNextTickAsync() && Value <= BufferValue && PlaySwitch)
 			{
 				Value += 1;
 				StateHasChanged();
