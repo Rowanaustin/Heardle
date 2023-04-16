@@ -144,12 +144,13 @@
 	{
 		if (firstRender)
 		{
+			_jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/SoundScripts.js");
 			await LoadLocalStorage();
 			await HandleStorageState();
 		} 
 	}
 
-	protected override async Task OnInitializedAsync()
+	protected override void OnInitialized()
 	{
 		var songData = fileOperationsService.GetData();
 		RefreshChartSeries();
@@ -157,8 +158,6 @@
 		_songName = songData._songData._songName;
 		_editionDate = songData._updateDate.DayOfWeek + " " + songData._updateDate.Date.ToString("d", new CultureInfo("en-GB"));
 		_editionVersion = songData._version;
-
-		_jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/SoundScripts.js");
 	}
 
 
@@ -292,6 +291,7 @@
 	{
 		if (_playSwitch)
 		{
+			Console.WriteLine("Play button set");
 			CallJsFunc("PlaySound");
 
 			//set timer
@@ -306,6 +306,7 @@
 		}
 		else
 		{
+			Console.WriteLine("Play button uset");
 			CallJsFunc("StopSound");
 			Value = 0;
 			StateHasChanged();
