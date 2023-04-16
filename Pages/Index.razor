@@ -72,6 +72,11 @@
 		</MudCard>
 	</MudStack>
 	</MudContainer>
+	<MudCard>
+		<MudCardContent>
+			<MudText Typo="Typo.body1">@_cookiesDebugDisplay</MudText>
+		</MudCardContent>
+	</MudCard>
 </MudContainer>
 
 <audio id="audioPlayer" src='@_audioAddress' type="audio/mpeg" />
@@ -124,6 +129,8 @@
 	private bool _localGameComplete;
 	private int[] _localResults;
 
+	private string _cookiesDebugDisplay;
+
 	private bool loading = true;
 	private bool loaded = false;
 
@@ -147,13 +154,16 @@
 			_jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/SoundScripts.js");
 			await LoadLocalStorage();
 			await HandleStorageState();
-		} 
+
+			RefreshChartSeries();
+			StateHasChanged();
+		}
 	}
 
 	protected override void OnInitialized()
 	{
-		var songData = fileOperationsService.GetData();
 		RefreshChartSeries();
+		var songData = fileOperationsService.GetData();
 		_audioAddress = "./Audio/" + songData._songData._fileName;
 		_songName = songData._songData._songName;
 		_editionDate = songData._updateDate.DayOfWeek + " " + songData._updateDate.Date.ToString("d", new CultureInfo("en-GB"));
@@ -182,15 +192,10 @@
 			if (_localGameComplete)
 				CompleteGame();
 		}
-		else
-		{
-			Console.WriteLine("cookies don't match server version");
-			await UpdateLocalStorage();
-		}
 
 		loading = false;
 		loaded = true;
-
+		SetCookiesDebugValues();
 		StateHasChanged();
 	}
 
@@ -240,7 +245,7 @@
 			var complete = await ProtectedLocalStore.GetAsync<bool>("gameComplete");
 			_localGameComplete = complete.Success ? complete.Value : false;
 		}
-		catch(Exception e)
+		catch (Exception e)
 		{
 			await JsRuntime.InvokeVoidAsync("console.log", $"ProtectedLocalStore error: {e.Message}");
 			try
@@ -280,6 +285,11 @@
 		await ProtectedLocalStore.SetAsync("guesses", _guesses);
 		await ProtectedLocalStore.SetAsync("gameComplete", GameCompleted);
 		await ProtectedLocalStore.SetAsync("results", _currentResults);
+	}
+
+	private void SetCookiesDebugValues()
+	{
+		_cookiesDebugDisplay = "version: " + _localVersion + "\nguesses: " + _localGuesses + "\ngameComplete: " + _localGameComplete + "\nlocalResults(failures): " + _localResults[0] + _localResults[1] + _localResults[2] + _localResults[3] + _localResults[4] + _localResults[5];
 	}
 
 	private async Task<IEnumerable<string>> AutoComplete(string search)
