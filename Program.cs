@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.DataProtection;
 using MudBlazor.Services;
 using RadioHeardleServer.Data;
 
@@ -16,7 +17,9 @@ namespace RadioHeardleServer
 			builder.Services.AddServerSideBlazor();
 			builder.Services.AddMudServices();
 			builder.Services.AddSingleton<FileOperationsService>(s => new FileOperationsService(!builder.Environment.IsDevelopment()));
-
+			builder.Services.AddDataProtection()
+			  .SetApplicationName("Radioheardle")
+			  .PersistKeysToFileSystem(new DirectoryInfo("temp-keys"));
 			var app = builder.Build();
 
 			// Configure the HTTP request pipeline.

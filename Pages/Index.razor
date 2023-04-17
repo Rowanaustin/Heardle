@@ -12,15 +12,21 @@
 <PageTitle>Radioheardle</PageTitle>
 
 
+
 <MudContainer MaxWidth="MaxWidth.Small">
-	<MudStack Justify="Justify.Center">
-		<MudCard hidden="@loaded">
-			<MudCardContent>
-				<MudText Align="Align.Center" Typo="Typo.body1">Loading...</MudText>
-			</MudCardContent>
-		</MudCard>
-	</MudStack>
-	<MudContainer hidden="@loading">
+	@if (loading)
+	{
+		<MudStack Justify="Justify.Center">
+			<MudCard >
+				<MudCardContent>
+					<MudText Align="Align.Center" Typo="Typo.body1">Loading...</MudText>
+				</MudCardContent>
+			</MudCard>
+		</MudStack>
+	}
+	else
+	{
+	<MudContainer >
 	<MudStack>
 		<MudCard >
 			<MudCardContent>
@@ -72,12 +78,14 @@
 		</MudCard>
 	</MudStack>
 	</MudContainer>
-	<MudCard>
+	}
+	<MudCard hidden="true">
 		<MudCardContent>
 			<MudText Typo="Typo.body1">@_cookiesDebugDisplay</MudText>
 		</MudCardContent>
 	</MudCard>
 </MudContainer>
+
 
 <audio id="audioPlayer" src='@_audioAddress' type="audio/mpeg" />
 
@@ -147,20 +155,32 @@
 		DisableLegend = true
 	};
 
-	protected override async Task OnAfterRenderAsync(bool firstRender)
-	{
-		if (firstRender)
-		{
-			_jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/SoundScripts.js");
-			await LoadLocalStorage();
-			await HandleStorageState();
+	//protected override async Task OnAfterRenderAsync(bool firstRender)
+	//{
+	//	if (firstRender)
+	//	{
+	//		_jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/SoundScripts.js");
+	//		await JsRuntime.InvokeVoidAsync("console.log", "OnAfterRenderAsync");
 
-			RefreshChartSeries();
-			StateHasChanged();
-		}
-	}
+	//		await LoadLocalStorage();
+	//		SetCookiesDebugValues("");
+	//		HandleStorageState();
+	//		RefreshChartSeries();
+	//		StateHasChanged();
+	//	}
+	//}
 
-	protected override void OnInitialized()
+	//protected override void OnInitialized()
+	//{
+	//	RefreshChartSeries();
+	//	var songData = fileOperationsService.GetData();
+	//	_audioAddress = "./Audio/" + songData._songData._fileName;
+	//	_songName = songData._songData._songName;
+	//	_editionDate = songData._updateDate.DayOfWeek + " " + songData._updateDate.Date.ToString("d", new CultureInfo("en-GB"));
+	//	_editionVersion = songData._version;
+	//}
+
+	protected override async Task OnInitializedAsync()
 	{
 		RefreshChartSeries();
 		var songData = fileOperationsService.GetData();
@@ -168,10 +188,17 @@
 		_songName = songData._songData._songName;
 		_editionDate = songData._updateDate.DayOfWeek + " " + songData._updateDate.Date.ToString("d", new CultureInfo("en-GB"));
 		_editionVersion = songData._version;
+		_jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/SoundScripts.js");
+		await JsRuntime.InvokeVoidAsync("console.log", "OnInitializedAsync");
+		await LoadLocalStorage();
+		SetCookiesDebugValues("");
+		HandleStorageState();
+		RefreshChartSeries();
+		StateHasChanged();
 	}
 
 
-	private async Task HandleStorageState()
+	private void HandleStorageState()
 	{
 		Console.WriteLine("Cookies version: " + _localVersion);
 		Console.WriteLine("Server version: " + _editionVersion);
@@ -195,7 +222,6 @@
 
 		loading = false;
 		loaded = true;
-		SetCookiesDebugValues();
 		StateHasChanged();
 	}
 
@@ -205,6 +231,8 @@
 		{
 			var version = await ProtectedLocalStore.GetAsync<int>("version");
 			_localVersion = version.Success ? version.Value : 1;
+			if (!version.Success)
+				await JsRuntime.InvokeVoidAsync("console.log", "version.Value == null");
 		}
 		catch (Exception e)
 		{
@@ -225,6 +253,8 @@
 		{
 			var guesses = await ProtectedLocalStore.GetAsync<string>("guesses");
 			_localGuesses = guesses.Success && guesses.Value != null ? guesses.Value : "";
+			if (guesses.Value == null)
+				await JsRuntime.InvokeVoidAsync("console.log", "guesses.Value == null");
 		}
 		catch (Exception e)
 		{
@@ -244,6 +274,8 @@
 		{
 			var complete = await ProtectedLocalStore.GetAsync<bool>("gameComplete");
 			_localGameComplete = complete.Success ? complete.Value : false;
+			if (!complete.Success)
+				await JsRuntime.InvokeVoidAsync("console.log", "complete.Value == null");
 		}
 		catch (Exception e)
 		{
@@ -263,6 +295,8 @@
 		{
 			var results = await ProtectedLocalStore.GetAsync<int[]>("results");
 			_localResults = results.Success && results.Value != null ? results.Value : new int[6];
+			if (results.Value == null)
+				await JsRuntime.InvokeVoidAsync("console.log", "results.Value == null");
 		}
 		catch (Exception e)
 		{
@@ -287,9 +321,9 @@
 		await ProtectedLocalStore.SetAsync("results", _currentResults);
 	}
 
-	private void SetCookiesDebugValues()
+	private void SetCookiesDebugValues(string title)
 	{
-		_cookiesDebugDisplay = "version: " + _localVersion + "\nguesses: " + _localGuesses + "\ngameComplete: " + _localGameComplete + "\nlocalResults(failures): " + _localResults[0] + _localResults[1] + _localResults[2] + _localResults[3] + _localResults[4] + _localResults[5];
+		_cookiesDebugDisplay+= title + "version: " + _localVersion + "\nguesses: " + _localGuesses + "\ngameComplete: " + _localGameComplete + "\nlocalResults(failures): " + _localResults[0] + _localResults[1] + _localResults[2] + _localResults[3] + _localResults[4] + _localResults[5]+ "----";
 	}
 
 	private async Task<IEnumerable<string>> AutoComplete(string search)
