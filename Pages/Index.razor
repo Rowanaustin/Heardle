@@ -67,6 +67,7 @@
 			<MudCardContent>
 					<MudText>Guess Distribution</MudText>
 					<MudChart ChartType="ChartType.Bar" ChartOptions="@chartOptions" ChartSeries="@Series" XAxisLabels="@XAxisLabels" Width="100%" Height="350px"></MudChart>
+					<MudText>Streak: @_streak</MudText>
 				</MudCardContent>
 		</MudCard>
 
@@ -131,11 +132,15 @@
 	private string _editionDate;
 	private int _editionVersion;
 	private int[] _currentResults;
+	private int _lastVersionWon;
+	private int _streak;
 
 	private int _localVersion;
 	private string _localGuesses;
 	private bool _localGameComplete;
 	private int[] _localResults;
+	private int _localLastVersionWon;
+	private int _localStreak;
 
 	private string _cookiesDebugDisplay;
 
@@ -204,6 +209,18 @@
 		Console.WriteLine("Server version: " + _editionVersion);
 
 		_currentResults = _localResults;
+
+
+		if (_localLastVersionWon +1  < _editionVersion )
+		{
+			_streak = 0;
+		}
+		else
+		{
+			_streak = _localStreak;
+		}
+
+		_lastVersionWon = _localLastVersionWon;
 
 		if (_localVersion == _editionVersion)
 		{
@@ -311,6 +328,50 @@
 			}
 			_localResults = new int[6];
 		}
+
+		try
+		{
+			var lastVersionCompleted = await ProtectedLocalStore.GetAsync<int>("lastVersionCompleted");
+			_localLastVersionWon = lastVersionCompleted.Success ? lastVersionCompleted.Value : -1;
+			if (!lastVersionCompleted.Success)
+				await JsRuntime.InvokeVoidAsync("console.log", "!lastVersionCompleted.Success");
+		}
+		catch (Exception e)
+		{
+			await JsRuntime.InvokeVoidAsync("console.log", $"ProtectedLocalStore error: {e.Message}");
+			try
+			{
+				await ProtectedLocalStore.DeleteAsync("lastVersionCompleted");
+			}
+			catch (Exception iex)
+			{
+				await JsRuntime.InvokeVoidAsync("console.log", $"Browser storage Delete error: {iex.Message}");
+			}
+
+			_localLastVersionWon = -1;
+		}
+
+		try
+		{
+			var streak = await ProtectedLocalStore.GetAsync<int>("streak");
+			_localStreak = streak.Success ? streak.Value : 0;
+			if (!streak.Success)
+				await JsRuntime.InvokeVoidAsync("console.log", "!streak.Success");
+		}
+		catch (Exception e)
+		{
+			await JsRuntime.InvokeVoidAsync("console.log", $"ProtectedLocalStore error: {e.Message}");
+			try
+			{
+				await ProtectedLocalStore.DeleteAsync("streak");
+			}
+			catch (Exception iex)
+			{
+				await JsRuntime.InvokeVoidAsync("console.log", $"Browser storage Delete error: {iex.Message}");
+			}
+
+			_localLastVersionWon = 0;
+		}
 	}
 
 	private async Task UpdateLocalStorage()
@@ -319,6 +380,8 @@
 		await ProtectedLocalStore.SetAsync("guesses", _guesses);
 		await ProtectedLocalStore.SetAsync("gameComplete", GameCompleted);
 		await ProtectedLocalStore.SetAsync("results", _currentResults);
+		await ProtectedLocalStore.SetAsync("lastVersionCompleted", _lastVersionWon);
+		await ProtectedLocalStore.SetAsync("streak", _streak);
 	}
 
 	private void SetCookiesDebugValues(string title)
@@ -378,7 +441,7 @@
 		{
 			_guesses += 'w';
 			_localResults[_guesses.Length] += 1;
-	
+
 			CompleteGame();
 			await UpdateLocalStorage();
 		}
@@ -439,6 +502,20 @@
 
 		GuessText = _songName;
 		GameCompleted = true;
+
+
+		if ( _editionVersion != _lastVersionWon)
+		{
+			if (win)
+			{
+				_streak += 1;
+				_lastVersionWon = _editionVersion;
+			}
+			else
+			{
+				_streak = 0;
+			}
+		}
 
 		RefreshChartSeries();
 
