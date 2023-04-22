@@ -10,6 +10,7 @@
     <None Remove="Data\currentSong.txt" />
     <None Remove="Data\lastUpdated.txt" />
     <None Remove="Data\songList.txt" />
+    <None Remove="temp-keys\key-31882c22-69dc-43ac-bd53-62b33b0edd46.xml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -17,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MudBlazor" Version="6.2.0" />
+    <PackageReference Include="MudBlazor" Version="6.2.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,6 +29,9 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Content>
     <Content Include="Data\songList.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="temp-keys\key-31882c22-69dc-43ac-bd53-62b33b0edd46.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
