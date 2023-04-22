@@ -65,9 +65,9 @@
 
 		<MudCard hidden="@gameIncomplete">
 			<MudCardContent>
-					<MudText>Guess Distribution</MudText>
+						<MudText Align="Align.Center">Streak: <h1>@_streak</h1></MudText>
 					<MudChart ChartType="ChartType.Bar" ChartOptions="@chartOptions" ChartSeries="@Series" XAxisLabels="@XAxisLabels" Width="100%" Height="350px"></MudChart>
-					<MudText>Streak: @_streak</MudText>
+						<MudText Align="Align.Center">Guess Distribution</MudText>
 				</MudCardContent>
 		</MudCard>
 
