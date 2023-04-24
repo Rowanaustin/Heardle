@@ -27,20 +27,26 @@
 	else
 	{
 	<MudContainer >
+		<MudStack Row=true Justify="Justify.SpaceBetween">
+			<MudButton OnClick="OnOpenHelp">Help</MudButton>
+			<MudButton OnClick="OnOpenStats">Stats</MudButton>
+		</MudStack>
 	<MudStack>
 		<MudCard >
 			<MudCardContent>
 				<MudText><h1>Radioheardle</h1></MudText>
 				<MudText>@_editionDate</MudText>
-				<MudText hidden="@gameIncomplete" Align="Align.Center" Typo="Typo.h4">@_songName</MudText>
-				<MudStack Justify="Justify.Center">
-					<MudChip hidden="@gameIncomplete" Color="@chipColor" Text="@chipText"></MudChip>
-				</MudStack>
 				<MudProgressLinear Color="@BarColour" Value="@BufferValue" Class="my-7" Size="Size.Medium" />
 				<MudProgressLinear Color="Color.Primary" Value="@Value" Class="my-7" Size="Size.Large" />
 				<MudSwitch @bind-Checked="@PlaySwitch" Label="Play" Color="Color.Success" />
 			</MudCardContent>
 		</MudCard>
+
+		<MudText hidden="@gameIncomplete" Align="Align.Center" Typo="Typo.h4">@_songName</MudText>
+
+		<MudStack Justify="Justify.Center">
+			<MudChip hidden="@gameIncomplete" Color="@chipColor" Text="@chipText"></MudChip>
+		</MudStack>
 
 		<MudCard hidden="@GameCompleted">
 			<MudCardContent>
@@ -57,34 +63,61 @@
 					</MudAutocomplete>
 			</MudCardContent>
 		</MudCard>
-		<MudCard hidden="@gameIncomplete">
-			<MudCardContent>
-				<MudTextField @bind-Value="ResultText" Lines="4" Variant="Variant.Outlined" Label="Copy this text to show your mates" ReadOnly="true"></MudTextField>
-			</MudCardContent>
-		</MudCard>
 
-		<MudCard hidden="@gameIncomplete">
-			<MudCardContent>
-						<MudText Align="Align.Center">Streak: <h1>@_streak</h1></MudText>
-					<MudChart ChartType="ChartType.Bar" ChartOptions="@chartOptions" ChartSeries="@Series" XAxisLabels="@XAxisLabels" Width="100%" Height="350px"></MudChart>
-						<MudText Align="Align.Center">Guess Distribution</MudText>
-				</MudCardContent>
-		</MudCard>
-
-		<MudCard hidden="@GameCompleted">
-			<MudCardContent>
-				<MudText Typo="Typo.body2">Guessing or Skipping will unlock the next section of the preview.</MudText>
-						<MudText Typo="Typo.body2">(First 7 Albums)</MudText>
-			</MudCardContent>
-		</MudCard>
 	</MudStack>
+
+		<!-- STATS -->
+			<MudOverlay @bind-Visible="_statsVisible" DarkBackground="true" OnClick="OnCloseOverlay">
+		<MudStack>
+			<MudCard>
+				<MudCardContent>
+							<MudText Align="Align.Right" Color="Color.Info"><h2>Stats</h2></MudText>
+					<MudGrid Justify="Justify.SpaceEvenly">
+						<MudTr>
+							<MudText Typo="Typo.caption" Align="Align.Center"><h1>@_gamesPlayed</h1>Played</MudText>
+						</MudTr>
+						<MudTr>
+							<MudText Typo="Typo.caption" ><h1>@_winPercentage</h1>Win %</MudText>
+						</MudTr>
+						<MudTr>
+							<MudText Typo="Typo.caption" Align="Align.Center"><h1>@_streak</h1>Current Streak</MudText>
+						</MudTr>
+					</MudGrid>
+			
+					<MudChart  ChartType="ChartType.Bar" ChartOptions="@chartOptions" ChartSeries="@Series" XAxisLabels="@XAxisLabels" Width="100%" Height="350px"></MudChart>
+					<MudSpacer ></MudSpacer>
+					<MudText Class="pa-6" Align="Align.Center">Guess Distribution</MudText>
+					</MudCardContent>
+			</MudCard>
+
+			<MudCard hidden="@gameIncomplete">
+				<MudCardContent>
+					<MudTextField @bind-Value="ResultText" Lines="4" Variant="Variant.Outlined" Label="Copy this text to show your mates" ReadOnly="true"></MudTextField>
+				</MudCardContent>
+			</MudCard>
+
+		</MudStack>
+
+		</MudOverlay>
+
+		<!-- ABOUT -->
+
+			<MudOverlay @bind-Visible="@_helpVisible" DarkBackground="true" OnClick="OnCloseOverlay">
+
+			<MudCard>
+				<MudCardContent>
+						<MudText Color="Color.Info" Align="Align.Right"><h2>About</h2></MudText>
+						<MudText Typo="Typo.body2">Guess the Radiohead song - you get 5 attempts.</MudText>
+						<MudText Typo="Typo.body2">Guessing incorrectly or skipping will unlock the next section of the preview.</MudText>
+						<MudText Typo="Typo.body2">The song is randomly chosen each day from the first 7 studio albums.</MudText>
+				</MudCardContent>
+			</MudCard>
+
+		</MudOverlay>
+
 	</MudContainer>
 	}
-	<MudCard hidden="true">
-		<MudCardContent>
-			<MudText Typo="Typo.body1">@_cookiesDebugDisplay</MudText>
-		</MudCardContent>
-	</MudCard>
+
 </MudContainer>
 
 
@@ -113,6 +146,8 @@
 	public string Skip { get; set; } = "Skip";
 
 	private bool gameIncomplete = true;
+	private bool _helpVisible = false;
+	private bool _statsVisible = false;
 	private Color chipColor;
 	private string chipText;
 
@@ -142,6 +177,9 @@
 	private int _localLastVersionWon;
 	private int _localStreak;
 
+	private int _winPercentage;
+	private int _gamesPlayed;
+
 	private string _cookiesDebugDisplay;
 
 	private bool loading = true;
@@ -155,9 +193,10 @@
 
 	private ChartOptions chartOptions = new ChartOptions()
 	{
-		LineStrokeWidth = 10.0,
+		LineStrokeWidth = 20.0,
 		YAxisTicks = 1,
-		DisableLegend = true
+		DisableLegend = true,
+		ChartPalette = new string[] { Colors.Green.Default, Colors.LightBlue.Default }
 	};
 
 	//protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -187,7 +226,7 @@
 
 	protected override async Task OnInitializedAsync()
 	{
-		RefreshChartSeries();
+		RefreshStats();
 		var songData = fileOperationsService.GetData();
 		_audioAddress = "./Audio/" + songData._songData._fileName;
 		_songName = songData._songData._songName;
@@ -198,7 +237,7 @@
 		await LoadLocalStorage();
 		SetCookiesDebugValues("");
 		HandleStorageState();
-		RefreshChartSeries();
+		RefreshStats();
 		StateHasChanged();
 	}
 
@@ -209,7 +248,6 @@
 		Console.WriteLine("Server version: " + _editionVersion);
 
 		_currentResults = _localResults;
-
 
 		if (_localLastVersionWon +1  < _editionVersion )
 		{
@@ -420,6 +458,29 @@
 		}
 	}
 
+	private void OnOpenHelp()
+	{
+		_helpVisible = true;
+
+		StateHasChanged();
+	}
+
+	private void OnOpenStats()
+	{
+		_statsVisible = true;
+
+		StateHasChanged();
+	}
+
+	private void OnCloseOverlay()
+	{
+		_helpVisible = false;
+		_statsVisible = false;
+
+		StateHasChanged();
+	}
+
+
 	private void HandleOnSkip()
 	{
 		GuessText = string.Empty;
@@ -517,7 +578,7 @@
 			}
 		}
 
-		RefreshChartSeries();
+		RefreshStats();
 
 		ResultText = ResultGenerator.GetResultText(_numGuesses, _guesses, _editionDate);
 
@@ -526,18 +587,48 @@
 		BarColour = Color.Primary;
 		gameIncomplete = false;
 		BufferValue = 100;
+
+		_statsVisible = true;
 	}
 
-	private void RefreshChartSeries()
+	private void RefreshStats()
 	{
 		var results = _localResults != null ? _localResults : new int[6];
-		var doubleArray = results.Select(x => (double)x).ToArray();
+
+		_gamesPlayed = 0;
+		foreach (var games in results)
+		{
+			_gamesPlayed += games;
+		}
+
+		if (_gamesPlayed != 0)
+		{
+			var losePercentage = (float)results[0] / _gamesPlayed;
+			_winPercentage = 100 - (int)(losePercentage * 100);
+		}
+
+		var withoutCurrent = new int[5];
+		Array.Copy(results, 1, withoutCurrent, 0, 5);
+		var mainArray = withoutCurrent.Select(x => (double)x).ToArray();
+
+		var current = new double[5];
+
+		if (GameCompleted)
+		{
+			if (_guesses.EndsWith('w'))
+			{
+				current[_guesses.Length - 1] = (double)results[_guesses.Length];
+				mainArray[_guesses.Length - 1] = 0;
+			}
+		}
+
 		Series = new List<ChartSeries>()
 		{
-			new ChartSeries() { Name = "Guess Distribution", Data = doubleArray }
+			new ChartSeries() { Name = "Current", Data = current },
+			new ChartSeries() { Name = "Guess Distribution", Data = mainArray }
 		};
 
-		XAxisLabels = new string[]{ "Fail", "1", "2", "3", "4", "5" };
+		XAxisLabels = new string[]{ "1", "2", "3", "4", "5" };
 	}
 
 	private void CallJsFunc(string funcName)
