@@ -33,7 +33,7 @@
 		<MudCard >
 			<MudCardContent>
 				<MudText Align="Align.Right"><h1>Radioheardle</h1></MudText>
-				<MudText>@_editionDate</MudText>
+				<MudText Align="Align.Right">@_editionDate</MudText>
 				<MudProgressLinear Color="@BarColour" Value="@BufferValue" Class="my-7" Size="Size.Medium" />
 				<MudProgressLinear Color="Color.Primary" Value="@Value" Class="my-7" Size="Size.Large" />
 				<MudSwitch @bind-Checked="@PlaySwitch" Label="Play" Color="Color.Success" />
@@ -99,12 +99,12 @@
 					<MudText Class="pa-2" Align="Align.Center">Guess Distribution</MudText>
 					</MudCardContent>
 			</MudCard>
-
 			<MudCard hidden="@gameIncomplete">
 				<MudCardContent>
-							<MudTextField @bind-Value="ResultText" onclick="@AutoHighlight()" Lines="4" Variant="Variant.Outlined" Label="Copy this text to show your mates" ReadOnly="true"></MudTextField>
+						<MudTextField @bind-Value="ResultText" onclick="@AutoHighlight()" Lines="4" Variant="Variant.Outlined" Label="Copy this text to show your mates" ReadOnly="true"></MudTextField>
 				</MudCardContent>
 			</MudCard>
+
 
 		</MudStack>
 
