@@ -40,11 +40,17 @@
 			</MudCardContent>
 		</MudCard>
 
-		<MudText hidden="@gameIncomplete" Align="Align.Center" Typo="Typo.h4">@_songName</MudText>
-
-		<MudStack Justify="Justify.Center">
-			<MudChip hidden="@gameIncomplete" Color="@chipColor" Text="@chipText"></MudChip>
-		</MudStack>
+		@if (GameCompleting)
+		{
+			<MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="100px"/>
+		}
+		else
+		{
+			<MudText hidden="@gameIncomplete" Align="Align.Center" Typo="Typo.h4">@_songName</MudText>
+			<MudStack Justify="Justify.Center">
+				<MudChip hidden="@gameIncomplete" Color="@chipColor" Text="@chipText"></MudChip>
+			</MudStack>
+		}
 
 		<MudCard hidden="@GameCompleted">
 			<MudCardContent>
@@ -65,7 +71,7 @@
 	</MudStack>
 
 		<!-- STATS -->
-			<MudOverlay Style="opacity:0.98" @bind-Visible="_statsVisible" DarkBackground="true">
+			<MudOverlay Style="opacity:0.99" @bind-Visible="_statsVisible" DarkBackground="true">
 		<MudStack>
 			<MudCard>
 				<MudCardContent>
@@ -96,7 +102,7 @@
 
 			<MudCard hidden="@gameIncomplete">
 				<MudCardContent>
-					<MudTextField @bind-Value="ResultText" Lines="4" Variant="Variant.Outlined" Label="Copy this text to show your mates" ReadOnly="true"></MudTextField>
+							<MudTextField @bind-Value="ResultText" onclick="@AutoHighlight()" Lines="4" Variant="Variant.Outlined" Label="Copy this text to show your mates" ReadOnly="true"></MudTextField>
 				</MudCardContent>
 			</MudCard>
 
@@ -106,7 +112,7 @@
 
 		<!-- ABOUT -->
 
-			<MudOverlay Style="opacity:0.98" @bind-Visible="@_helpVisible" DarkBackground="true">
+			<MudOverlay Style="opacity:0.99" @bind-Visible="@_helpVisible" DarkBackground="true">
 
 			<MudCard>
 				<MudCardContent>
@@ -143,6 +149,7 @@
 	private static int _bufferTick = _totalSectionDuration * 10;
 
 	public bool GameCompleted { get; set; } = false;
+	public bool GameCompleting { get; set; } = true;
 	public int Value { get; set; } = 0;
 	public float BufferValue { get; set; } = _bufferPart * _sectionDurations[0];
 
@@ -233,6 +240,13 @@
 	//	_editionDate = songData._updateDate.DayOfWeek + " " + songData._updateDate.Date.ToString("d", new CultureInfo("en-GB"));
 	//	_editionVersion = songData._version;
 	//}
+
+	private string AutoHighlight()
+	{
+		// this.select() reportedly has mobile safari issues. Instead we need .setSelectionRange.
+		// Some versions of chrome reportedly can not highlight immediately after focusing. To handle this we add a delay before highlighting.
+		return "window.focusedElement = this;  setTimeout(function () { window.focusedElement.setSelectionRange(0, window.focusedElement.value.length) }, 100);";
+	}
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -567,7 +581,7 @@
 		StateHasChanged();
 	}
 
-	private void CompleteGame()
+	private async void CompleteGame()
 	{
 		var win = _guesses.EndsWith('w');
 
@@ -598,7 +612,17 @@
 		gameIncomplete = false;
 		BufferValue = 100;
 
+		await ProcessCompletion();
+	}
+
+	private async Task ProcessCompletion()
+	{
+		await Task.Delay(2000);
+		GameCompleting = false;
+		StateHasChanged();
+		await Task.Delay(3000);
 		_statsVisible = true;
+		StateHasChanged();
 	}
 
 	private void RefreshStats()
