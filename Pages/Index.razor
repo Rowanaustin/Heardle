@@ -11,8 +11,6 @@
 
 <PageTitle>Radioheardle</PageTitle>
 
-
-
 <MudContainer MaxWidth="MaxWidth.Small">
 	@if (loading)
 	{
@@ -28,13 +26,13 @@
 	{
 	<MudContainer >
 		<MudStack Row=true Justify="Justify.SpaceBetween">
-			<MudButton OnClick="OnOpenHelp">Help</MudButton>
-			<MudButton OnClick="OnOpenStats">Stats</MudButton>
+				<MudButton Color="Color.Surface" OnClick="OnOpenHelp">About</MudButton>
+			<MudButton Color="Color.Surface" OnClick="OnOpenStats">Stats</MudButton>
 		</MudStack>
 	<MudStack>
 		<MudCard >
 			<MudCardContent>
-				<MudText><h1>Radioheardle</h1></MudText>
+				<MudText Align="Align.Right"><h1>Radioheardle</h1></MudText>
 				<MudText>@_editionDate</MudText>
 				<MudProgressLinear Color="@BarColour" Value="@BufferValue" Class="my-7" Size="Size.Medium" />
 				<MudProgressLinear Color="Color.Primary" Value="@Value" Class="my-7" Size="Size.Large" />
@@ -67,26 +65,32 @@
 	</MudStack>
 
 		<!-- STATS -->
-			<MudOverlay @bind-Visible="_statsVisible" DarkBackground="true" OnClick="OnCloseOverlay">
+			<MudOverlay Style="opacity:0.98" @bind-Visible="_statsVisible" DarkBackground="true">
 		<MudStack>
 			<MudCard>
 				<MudCardContent>
-							<MudText Align="Align.Right" Color="Color.Info"><h2>Stats</h2></MudText>
+					<MudStack Justify="Justify.SpaceBetween" Row=true>
+						<MudStack>
+						<MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Surface" OnClick="OnCloseOverlay">Close</MudButton>
+						<MudItem></MudItem>
+								</MudStack>
+						<MudText Class="pa-4" Align="Align.Right" Color="Color.Info"><h2>Stats</h2></MudText>
+					</MudStack>
 					<MudGrid Justify="Justify.SpaceEvenly">
 						<MudTr>
-							<MudText Typo="Typo.caption" Align="Align.Center"><h1>@_gamesPlayed</h1>Played</MudText>
+							<StatsBadge Description="Played" Stat="@_gamesPlayed"></StatsBadge>
 						</MudTr>
 						<MudTr>
-							<MudText Typo="Typo.caption" ><h1>@_winPercentage</h1>Win %</MudText>
+							<StatsBadge Description="Win Percent" Stat="@_winPercentage" IsPercent=true></StatsBadge>
 						</MudTr>
 						<MudTr>
-							<MudText Typo="Typo.caption" Align="Align.Center"><h1>@_streak</h1>Current Streak</MudText>
+							<StatsBadge Description="Current Streak" Stat="@_streak"></StatsBadge>
 						</MudTr>
 					</MudGrid>
 			
 					<MudChart  ChartType="ChartType.Bar" ChartOptions="@chartOptions" ChartSeries="@Series" XAxisLabels="@XAxisLabels" Width="100%" Height="350px"></MudChart>
 					<MudSpacer ></MudSpacer>
-					<MudText Class="pa-6" Align="Align.Center">Guess Distribution</MudText>
+					<MudText Class="pa-2" Align="Align.Center">Guess Distribution</MudText>
 					</MudCardContent>
 			</MudCard>
 
@@ -102,11 +106,17 @@
 
 		<!-- ABOUT -->
 
-			<MudOverlay @bind-Visible="@_helpVisible" DarkBackground="true" OnClick="OnCloseOverlay">
+			<MudOverlay Style="opacity:0.98" @bind-Visible="@_helpVisible" DarkBackground="true">
 
 			<MudCard>
 				<MudCardContent>
-						<MudText Color="Color.Info" Align="Align.Right"><h2>About</h2></MudText>
+					<MudStack Justify="Justify.SpaceBetween" Row=true>
+						<MudStack>
+								<MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Surface" OnClick="OnCloseOverlay">Close</MudButton>
+							<MudItem></MudItem>
+						</MudStack>
+						<MudText Class="pa-4" Color="Color.Info" Align="Align.Right"><h2>About</h2></MudText>
+					</MudStack>
 						<MudText Typo="Typo.body2">Guess the Radiohead song - you get 5 attempts.</MudText>
 						<MudText Typo="Typo.body2">Guessing incorrectly or skipping will unlock the next section of the preview.</MudText>
 						<MudText Typo="Typo.body2">The song is randomly chosen each day from the first 7 studio albums.</MudText>

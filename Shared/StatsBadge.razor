@@ -1,0 +1,26 @@
+﻿@using MudBlazor
+<MudStack Justify="Justify.SpaceEvenly">
+	<MudText Typo="Typo.h4" Align="Align.Center">@statText</MudText>
+	<MudText Typo="Typo.caption" Align="Align.Center">@Description</MudText>
+</MudStack>
+
+@code {
+
+	[Parameter]
+	public int Stat { get; set; }
+
+	[Parameter]
+	public bool IsPercent { get; set; } = false;
+
+	[Parameter]
+	public string Description { get; set; }
+
+	private string statText;
+
+	protected override void OnParametersSet()
+	{
+		statText = Stat.ToString();
+		if (IsPercent)
+			statText += "%";
+	}
+}
