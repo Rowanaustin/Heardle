@@ -40,7 +40,7 @@
 			</MudCardContent>
 		</MudCard>
 
-		@if (GameCompleting)
+		@if (WaitingToShowAnswer)
 		{
 			<MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="100px"/>
 		}
@@ -149,7 +149,7 @@
 	private static int _bufferTick = _totalSectionDuration * 10;
 
 	public bool GameCompleted { get; set; } = false;
-	public bool GameCompleting { get; set; } = true;
+	public bool WaitingToShowAnswer { get; set; } = false;
 	public int Value { get; set; } = 0;
 	public float BufferValue { get; set; } = _bufferPart * _sectionDurations[0];
 
@@ -216,35 +216,8 @@
 		ChartPalette = new string[] { Colors.Green.Default, Colors.LightBlue.Default }
 	};
 
-	//protected override async Task OnAfterRenderAsync(bool firstRender)
-	//{
-	//	if (firstRender)
-	//	{
-	//		_jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/SoundScripts.js");
-	//		await JsRuntime.InvokeVoidAsync("console.log", "OnAfterRenderAsync");
-
-	//		await LoadLocalStorage();
-	//		SetCookiesDebugValues("");
-	//		HandleStorageState();
-	//		RefreshChartSeries();
-	//		StateHasChanged();
-	//	}
-	//}
-
-	//protected override void OnInitialized()
-	//{
-	//	RefreshChartSeries();
-	//	var songData = fileOperationsService.GetData();
-	//	_audioAddress = "./Audio/" + songData._songData._fileName;
-	//	_songName = songData._songData._songName;
-	//	_editionDate = songData._updateDate.DayOfWeek + " " + songData._updateDate.Date.ToString("d", new CultureInfo("en-GB"));
-	//	_editionVersion = songData._version;
-	//}
-
 	private string AutoHighlight()
 	{
-		// this.select() reportedly has mobile safari issues. Instead we need .setSelectionRange.
-		// Some versions of chrome reportedly can not highlight immediately after focusing. To handle this we add a delay before highlighting.
 		return "window.focusedElement = this;  setTimeout(function () { window.focusedElement.setSelectionRange(0, window.focusedElement.value.length) }, 100);";
 	}
 
@@ -617,8 +590,9 @@
 
 	private async Task ProcessCompletion()
 	{
+		WaitingToShowAnswer = true;
 		await Task.Delay(2000);
-		GameCompleting = false;
+		WaitingToShowAnswer = false;
 		StateHasChanged();
 		await Task.Delay(3000);
 		_statsVisible = true;
