@@ -2,21 +2,20 @@
 {
 	public class FileOperationsService
 	{
-		private static string songFile = "Data/currentSong.txt";
-		private static string lastUpdatedFile = "Data/lastUpdated.txt";
-		private static string songListFile = "Data/songList.txt";
-		private static readonly TimeSpan updateAfter = new TimeSpan(0, 2, 0);
-		private static readonly TimeSpan serverTimeBehind = new TimeSpan(8, 0, 0);
+		private readonly static string songFile = "Data/currentSong.txt";
+		private readonly static string lastUpdatedFile = "Data/lastUpdated.txt";
+		private readonly static string songListFile = "Data/songList.txt";
+		private static readonly TimeSpan serverTimeBehind = new (8, 0, 0);
 
-		private static int fileNameIndex = 0;
-		private static int songNameIndex = 1;
+		private readonly static int fileNameIndex = 0;
+		private readonly static int songNameIndex = 1;
 
-		private static int updatedDateIndex = 0;
-		private static int versionIndex = 1;
+		private readonly static int updatedDateIndex = 0;
+		private readonly static int versionIndex = 1;
 
-		private bool isProduction;
+		private readonly bool isProduction;
 
-		private string[] _songNamesList;
+		private readonly string[] _songNamesList;
 
 		public FileOperationsService(bool production)
 		{
@@ -82,7 +81,7 @@
 			}
 		}
 
-		private SongData GetRandomSong()
+		private static SongData GetRandomSong()
 		{
 			var currentSong = "";
 			if (FileExists(songFile))
@@ -107,7 +106,7 @@
 			return new SongData(data);
 		}
 
-		private string[] GetSongNameList()
+		private static string[] GetSongNameList()
 		{
 			var fileData = ReadLines(songListFile);
 
@@ -147,10 +146,8 @@
 			return time;
 		}
 
-		private int GetVersion()
+		private static int GetVersion()
 		{
-			DateTime time;
-
 			if (!FileExists(lastUpdatedFile))
 				return 1;
 			else
@@ -184,17 +181,17 @@
 			WriteLine(lastUpdatedFile, versionIndex, version.ToString());
 		}
 
-		private bool FileExists(string fileName)
+		private static bool FileExists(string fileName)
 		{
 			return File.Exists(fileName);
 		}
 
-		private string[] ReadLines(string filename)
+		private static string[] ReadLines(string filename)
 		{
 			return ReadFile(filename).Split("\n");
 		}
 
-		private string ReadLine(string filename, int index)
+		private static string ReadLine(string filename, int index)
 		{
 
 			var lines = ReadFile(filename).Split("\n");
@@ -204,17 +201,17 @@
 			return "Read nothing from line " + index + " of " + filename;
 		}
 
-		private string ReadFile(string filename)
+		private static string ReadFile(string filename)
 		{
 			return File.ReadAllText(filename);
 		}
 
-		private void Write(string filename, string text)
+		private static void Write(string filename, string text)
 		{
 			File.WriteAllText(filename, text);
 		}
 
-		private void WriteLine(string filename, int index, string line)
+		private static void WriteLine(string filename, int index, string line)
 		{
 			var lines = File.ReadAllLines(filename).ToList();
 

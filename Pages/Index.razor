@@ -1,12 +1,14 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 @using MudBlazor
 @using RadioHeardleServer.Data;
 @using System.Globalization;
-@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
-@inject ProtectedLocalStorage ProtectedLocalStore
 
-@inject IJSRuntime JsRuntime;
-@inject FileOperationsService fileOperationsService;
+@inject IJSRuntime JsRuntime
+@inject FileOperationsService FileOperationsService
+@inject MudThemeProvider MudThemeProvider
+@inject ProtectedLocalStorage ProtectedLocalStore
+@inject CookiesService CookiesService
 
 
 <PageTitle>Radioheardle</PageTitle>
@@ -14,20 +16,41 @@
 <MudContainer MaxWidth="MaxWidth.Small">
 	@if (loading)
 	{
-		<MudStack Justify="Justify.Center">
-			<MudCard >
-				<MudCardContent>
-					<MudText Align="Align.Center" Typo="Typo.body1">Loading...</MudText>
-				</MudCardContent>
-			</MudCard>
-		</MudStack>
+		<MudContainer MaxWidth="MaxWidth.Small">
+
+				<MudStack Row=true Justify="Justify.SpaceBetween">
+					<MudSkeleton Width="10%" Height="25px" SkeletonType="SkeletonType.Rectangle" />
+					<MudSkeleton Width="10%" Height="25px" SkeletonType="SkeletonType.Rectangle" />
+				</MudStack>
+
+			<MudStack>
+				<MudCard >
+					<MudCardContent>
+						<MudStack Justify="Justify.SpaceEvenly">
+							<MudStack AlignItems="AlignItems.End">
+								<MudSkeleton Width="42%" Height="43px" SkeletonType="SkeletonType.Rectangle" />
+								<MudSkeleton Width="32%" Height="25px" SkeletonType="SkeletonType.Rectangle" />
+							</MudStack>
+
+						<MudSkeleton />
+						<MudSkeleton />
+							<MudSkeleton Width="35px" Height="35px" SkeletonType="SkeletonType.Circle"></MudSkeleton>
+						</MudStack>
+					</MudCardContent>
+				</MudCard>
+
+				<MudSkeleton />
+				<MudSkeleton Height="150px" SkeletonType="SkeletonType.Rectangle" />
+
+			</MudStack>
+		</MudContainer>
 	}
 	else
 	{
 	<MudContainer >
 		<MudStack Row=true Justify="Justify.SpaceBetween">
-				<MudButton Color="Color.Surface" OnClick="OnOpenHelp">About</MudButton>
-			<MudButton Color="Color.Surface" OnClick="OnOpenStats">Stats</MudButton>
+				<MudButton Color="Color.Surface" OnClick="OnOpenHelp" Disabled="@WaitingToShowStats">About</MudButton>
+				<MudButton Color="Color.Surface" OnClick="OnOpenStats" Disabled="@WaitingToShowStats">Stats</MudButton>
 		</MudStack>
 	<MudStack>
 		<MudCard >
@@ -40,18 +63,11 @@
 			</MudCardContent>
 		</MudCard>
 
-		@if (WaitingToShowAnswer)
-		{
-			<MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="100px"/>
-		}
-		else
-		{
-			<MudText hidden="@gameIncomplete" Align="Align.Center" Typo="Typo.h4">@_songName</MudText>
-			<MudStack Justify="Justify.Center">
-				<MudChip hidden="@gameIncomplete" Color="@chipColor" Text="@chipText"></MudChip>
-			</MudStack>
-		}
-
+		<MudText hidden="@gameIncomplete" Align="Align.Center" Typo="Typo.h4">@_songName</MudText>
+		<MudStack Justify="Justify.Center">
+			<MudChip hidden="@gameIncomplete" Color="@chipColor" Text="@chipText"></MudChip>
+		</MudStack>
+		
 		<MudCard hidden="@GameCompleted">
 			<MudCardContent>
 				<MudStack Row=true Spacing="4">
@@ -112,29 +128,41 @@
 
 		<!-- ABOUT -->
 
-			<MudOverlay Style="opacity:0.99" @bind-Visible="@_helpVisible" DarkBackground="true">
-
-			<MudCard>
-				<MudCardContent>
-					<MudStack Justify="Justify.SpaceBetween" Row=true>
-						<MudStack>
-								<MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Surface" OnClick="OnCloseOverlay">Close</MudButton>
-							<MudItem></MudItem>
+		<MudOverlay Style="opacity:0.99" @bind-Visible="@_helpVisible" DarkBackground="true">
+			<MudStack>
+				<MudCard>
+					<MudCardContent>
+						<MudStack Justify="Justify.SpaceBetween" Row=true>
+							<MudStack>
+									<MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Surface" OnClick="OnCloseOverlay">Close</MudButton>
+								<MudItem></MudItem>
+							</MudStack>
+							<MudText Class="pa-4" Color="Color.Info" Align="Align.Right"><h2>About</h2></MudText>
 						</MudStack>
-						<MudText Class="pa-4" Color="Color.Info" Align="Align.Right"><h2>About</h2></MudText>
-					</MudStack>
-						<MudText Typo="Typo.body2">Guess the Radiohead song - you get 5 attempts.</MudText>
-						<MudText Typo="Typo.body2">Guessing incorrectly or skipping will unlock the next section of the preview.</MudText>
-						<MudText Typo="Typo.body2">The song is randomly chosen each day from the first 7 studio albums.</MudText>
-				</MudCardContent>
-			</MudCard>
+							<MudText Typo="Typo.body2">Guess the Radiohead song - you get 5 attempts.</MudText>
+							<MudText Typo="Typo.body2">Guessing incorrectly or skipping will unlock the next section of the preview.</MudText>
+							<MudText Typo="Typo.body2">The song is randomly chosen each day from the first 7 studio albums.</MudText>
+					</MudCardContent>
+				</MudCard>
+					<MudCardContent>
+						<MudCard>
+							<MudCardContent>
+								<MudSwitch @bind-Checked="IsDarkMode" Label="Dark Mode" Color="Color.Surface" />
+							</MudCardContent>
+						</MudCard>
+					</MudCardContent>
+						<MudCard>
 
+				</MudCard>
+			</MudStack>
 		</MudOverlay>
 
 	</MudContainer>
 	}
 
 </MudContainer>
+
+<MudThemeProvider IsDarkMode="@_isDarkMode"></MudThemeProvider>
 
 
 <audio id="audioPlayer" src='@_audioAddress' type="audio/mpeg" />
@@ -149,7 +177,7 @@
 	private static int _bufferTick = _totalSectionDuration * 10;
 
 	public bool GameCompleted { get; set; } = false;
-	public bool WaitingToShowAnswer { get; set; } = false;
+	public bool WaitingToShowStats { get; set; } = false;
 	public int Value { get; set; } = 0;
 	public float BufferValue { get; set; } = _bufferPart * _sectionDurations[0];
 
@@ -187,17 +215,8 @@
 	private int _lastVersionWon;
 	private int _streak;
 
-	private int _localVersion;
-	private string _localGuesses;
-	private bool _localGameComplete;
-	private int[] _localResults;
-	private int _localLastVersionWon;
-	private int _localStreak;
-
 	private int _winPercentage;
 	private int _gamesPlayed;
-
-	private string _cookiesDebugDisplay;
 
 	private bool loading = true;
 	private bool loaded = false;
@@ -207,6 +226,13 @@
 	public void Dispose() => _disposed = true;
 
 	private IJSObjectReference _jsModule;
+
+	private bool _isDarkMode;
+	public bool IsDarkMode
+	{
+		get { return _isDarkMode; }
+		set { _isDarkMode = value; HandleOnDarkModeChanged(); }
+	}
 
 	private ChartOptions chartOptions = new ChartOptions()
 	{
@@ -224,42 +250,39 @@
 	protected override async Task OnInitializedAsync()
 	{
 		RefreshStats();
-		var songData = fileOperationsService.GetData();
+		var songData = FileOperationsService.GetData();
 		_audioAddress = "./Audio/" + songData._songData._fileName;
 		_songName = songData._songData._songName;
 		_editionDate = songData._updateDate.DayOfWeek + " " + songData._updateDate.Date.ToString("d", new CultureInfo("en-GB"));
 		_editionVersion = songData._version;
 		_jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/SoundScripts.js");
-		await JsRuntime.InvokeVoidAsync("console.log", "OnInitializedAsync");
-		await LoadLocalStorage();
-		SetCookiesDebugValues("");
+		CookiesService.Setup(ProtectedLocalStore);
+		await CookiesService.LoadStorage();
 		HandleStorageState();
 		RefreshStats();
 		StateHasChanged();
 	}
 
-
 	private void HandleStorageState()
 	{
-		Console.WriteLine("Cookies version: " + _localVersion);
-		Console.WriteLine("Server version: " + _editionVersion);
+		_isDarkMode = CookiesService.DarkSetting;
 
-		_currentResults = _localResults;
+		_currentResults = CookiesService.Results;
 
-		if (_localLastVersionWon +1  < _editionVersion )
+		if (CookiesService.LastVersionWon +1  < _editionVersion )
 		{
 			_streak = 0;
 		}
 		else
 		{
-			_streak = _localStreak;
+			_streak = CookiesService.Streak;
 		}
 
-		_lastVersionWon = _localLastVersionWon;
+		_lastVersionWon = CookiesService.LastVersionWon;
 
-		if (_localVersion == _editionVersion)
+		if (CookiesService.Version == _editionVersion)
 		{
-			_guesses = _localGuesses;
+			_guesses = CookiesService.Guesses;
 
 			for (int i = 0; i <= _guesses.Length; i++)
 			{
@@ -268,7 +291,7 @@
 
 			HandleSkipPosition();
 
-			if (_localGameComplete)
+			if (CookiesService.GameComplete)
 				CompleteGame();
 		}
 
@@ -277,163 +300,22 @@
 		StateHasChanged();
 	}
 
-	private async Task LoadLocalStorage()
-	{
-		try
-		{
-			var version = await ProtectedLocalStore.GetAsync<int>("version");
-			_localVersion = version.Success ? version.Value : 1;
-			if (!version.Success)
-				await JsRuntime.InvokeVoidAsync("console.log", "version.Value == null");
-		}
-		catch (Exception e)
-		{
-			await JsRuntime.InvokeVoidAsync("console.log", $"ProtectedLocalStore error: {e.Message}");
-			try
-			{
-				await ProtectedLocalStore.DeleteAsync("version");
-			}
-			catch (Exception iex)
-			{
-				await JsRuntime.InvokeVoidAsync("console.log", $"Browser storage Delete error: {iex.Message}");
-			}
-
-			_localVersion = 1;
-		}
-
-		try
-		{
-			var guesses = await ProtectedLocalStore.GetAsync<string>("guesses");
-			_localGuesses = guesses.Success && guesses.Value != null ? guesses.Value : "";
-			if (guesses.Value == null)
-				await JsRuntime.InvokeVoidAsync("console.log", "guesses.Value == null");
-		}
-		catch (Exception e)
-		{
-			await JsRuntime.InvokeVoidAsync("console.log", $"ProtectedLocalStore error: {e.Message}");
-			try
-			{
-				await ProtectedLocalStore.DeleteAsync("guesses");
-			}
-			catch (Exception iex)
-			{
-				await JsRuntime.InvokeVoidAsync("console.log", $"Browser storage Delete error: {iex.Message}");
-			}
-			_localGuesses = "";
-		}
-
-		try
-		{
-			var complete = await ProtectedLocalStore.GetAsync<bool>("gameComplete");
-			_localGameComplete = complete.Success ? complete.Value : false;
-			if (!complete.Success)
-				await JsRuntime.InvokeVoidAsync("console.log", "complete.Value == null");
-		}
-		catch (Exception e)
-		{
-			await JsRuntime.InvokeVoidAsync("console.log", $"ProtectedLocalStore error: {e.Message}");
-			try
-			{
-				await ProtectedLocalStore.DeleteAsync("gameComplete");
-			}
-			catch (Exception iex)
-			{
-				await JsRuntime.InvokeVoidAsync("console.log", $"Browser storage Delete error: {iex.Message}");
-			}
-			_localGameComplete = false;
-		}
-
-		try
-		{
-			var results = await ProtectedLocalStore.GetAsync<int[]>("results");
-			_localResults = results.Success && results.Value != null ? results.Value : new int[6];
-			if (results.Value == null)
-				await JsRuntime.InvokeVoidAsync("console.log", "results.Value == null");
-		}
-		catch (Exception e)
-		{
-			await JsRuntime.InvokeVoidAsync("console.log", $"ProtectedLocalStore error: {e.Message}");
-			try
-			{
-				await ProtectedLocalStore.DeleteAsync("results");
-			}
-			catch (Exception iex)
-			{
-				await JsRuntime.InvokeVoidAsync("console.log", $"Browser storage Delete error: {iex.Message}");
-			}
-			_localResults = new int[6];
-		}
-
-		try
-		{
-			var lastVersionCompleted = await ProtectedLocalStore.GetAsync<int>("lastVersionCompleted");
-			_localLastVersionWon = lastVersionCompleted.Success ? lastVersionCompleted.Value : -1;
-			if (!lastVersionCompleted.Success)
-				await JsRuntime.InvokeVoidAsync("console.log", "!lastVersionCompleted.Success");
-		}
-		catch (Exception e)
-		{
-			await JsRuntime.InvokeVoidAsync("console.log", $"ProtectedLocalStore error: {e.Message}");
-			try
-			{
-				await ProtectedLocalStore.DeleteAsync("lastVersionCompleted");
-			}
-			catch (Exception iex)
-			{
-				await JsRuntime.InvokeVoidAsync("console.log", $"Browser storage Delete error: {iex.Message}");
-			}
-
-			_localLastVersionWon = -1;
-		}
-
-		try
-		{
-			var streak = await ProtectedLocalStore.GetAsync<int>("streak");
-			_localStreak = streak.Success ? streak.Value : 0;
-			if (!streak.Success)
-				await JsRuntime.InvokeVoidAsync("console.log", "!streak.Success");
-		}
-		catch (Exception e)
-		{
-			await JsRuntime.InvokeVoidAsync("console.log", $"ProtectedLocalStore error: {e.Message}");
-			try
-			{
-				await ProtectedLocalStore.DeleteAsync("streak");
-			}
-			catch (Exception iex)
-			{
-				await JsRuntime.InvokeVoidAsync("console.log", $"Browser storage Delete error: {iex.Message}");
-			}
-
-			_localLastVersionWon = 0;
-		}
-	}
-
-	private async Task UpdateLocalStorage()
-	{
-		await ProtectedLocalStore.SetAsync("version", _editionVersion);
-		await ProtectedLocalStore.SetAsync("guesses", _guesses);
-		await ProtectedLocalStore.SetAsync("gameComplete", GameCompleted);
-		await ProtectedLocalStore.SetAsync("results", _currentResults);
-		await ProtectedLocalStore.SetAsync("lastVersionCompleted", _lastVersionWon);
-		await ProtectedLocalStore.SetAsync("streak", _streak);
-	}
-
-	private void SetCookiesDebugValues(string title)
-	{
-		_cookiesDebugDisplay+= title + "version: " + _localVersion + "\nguesses: " + _localGuesses + "\ngameComplete: " + _localGameComplete + "\nlocalResults(failures): " + _localResults[0] + _localResults[1] + _localResults[2] + _localResults[3] + _localResults[4] + _localResults[5]+ "----";
-	}
-
 	private async Task<IEnumerable<string>> AutoComplete(string search)
 	{
-		return fileOperationsService.GetSearchSongs(search);
+		return FileOperationsService.GetSearchSongs(search);
+	}
+
+	private void HandleOnDarkModeChanged()
+	{
+		StateHasChanged();
+		CookiesService.DarkSetting = _isDarkMode;
+		CookiesService.CommitStorage();
 	}
 
 	private async void HandleOnPlayChanged()
 	{
 		if (_playSwitch)
 		{
-			Console.WriteLine("Play button set");
 			CallJsFunc("PlaySound");
 
 			//set timer
@@ -448,7 +330,6 @@
 		}
 		else
 		{
-			Console.WriteLine("Play button uset");
 			CallJsFunc("StopSound");
 			Value = 0;
 			StateHasChanged();
@@ -484,8 +365,9 @@
 		_guesses += 's';
 		BufferValue += _bufferPart * _sectionDurations[_guesses.Length];
 		if (_guesses.Length >= (_numGuesses))
-			_localResults[0] += 1;
+			CookiesService.Results[0] += 1;
 		HandleSkipPosition();
+
 	}
 
 	private async void HandleOnGuess()
@@ -498,19 +380,21 @@
 		if (string.Compare(GuessText.Trim(), song, StringComparison.InvariantCultureIgnoreCase) == 0)
 		{
 			_guesses += 'w';
-			_localResults[_guesses.Length] += 1;
+			CookiesService.Results[_guesses.Length] += 1;
 
 			CompleteGame();
-			await UpdateLocalStorage();
 		}
 		else
 		{
 			_guesses += 'g';
 			BufferValue += _bufferPart * _sectionDurations[_guesses.Length];
 			if (_guesses.Length >= (_numGuesses))
-				_localResults[0] += 1;
+				CookiesService.Results[0] += 1;
 			HandleSkipPosition();
 		}
+
+		UpdateCookies();
+		await CookiesService.CommitStorage();
 	}
 
 	private async void HandleSkipPosition()
@@ -549,7 +433,8 @@
 			Skip = "Give up";
 		}
 
-		await UpdateLocalStorage();
+		UpdateCookies();
+		await CookiesService.CommitStorage();
 
 		StateHasChanged();
 	}
@@ -560,7 +445,6 @@
 
 		GuessText = _songName;
 		GameCompleted = true;
-
 
 		if ( _editionVersion != _lastVersionWon)
 		{
@@ -588,20 +472,24 @@
 		await ProcessCompletion();
 	}
 
+	private void UpdateCookies()
+	{
+		CookiesService.UpdateStorage(_editionVersion, _guesses, GameCompleted, _currentResults, _lastVersionWon, _streak);
+	}
+
 	private async Task ProcessCompletion()
 	{
-		WaitingToShowAnswer = true;
-		await Task.Delay(2000);
-		WaitingToShowAnswer = false;
+		WaitingToShowStats = true;
 		StateHasChanged();
 		await Task.Delay(3000);
 		_statsVisible = true;
+		WaitingToShowStats = false;
 		StateHasChanged();
 	}
 
 	private void RefreshStats()
 	{
-		var results = _localResults != null ? _localResults : new int[6];
+		var results = CookiesService.Results != null ? CookiesService.Results : new int[6];
 
 		_gamesPlayed = 0;
 		foreach (var games in results)
