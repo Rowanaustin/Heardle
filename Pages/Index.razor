@@ -227,7 +227,7 @@
 
 	private IJSObjectReference _jsModule;
 
-	private bool _isDarkMode;
+	private bool _isDarkMode = true;
 	public bool IsDarkMode
 	{
 		get { return _isDarkMode; }
@@ -289,10 +289,12 @@
 				BufferValue += _bufferPart * _sectionDurations[i];
 			}
 
-			HandleSkipPosition();
-
 			if (CookiesService.GameComplete)
+			{
 				CompleteGame();
+			}
+			else
+				HandleSkipPosition();
 		}
 
 		loading = false;
@@ -367,7 +369,6 @@
 		if (_guesses.Length >= (_numGuesses))
 			CookiesService.Results[0] += 1;
 		HandleSkipPosition();
-
 	}
 
 	private async void HandleOnGuess()
