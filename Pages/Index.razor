@@ -3,6 +3,7 @@
 @using MudBlazor
 @using RadioHeardleServer.Data;
 @using System.Globalization;
+@using Fastenshtein;
 
 @inject IJSRuntime JsRuntime
 @inject FileOperationsService FileOperationsService
@@ -304,7 +305,7 @@
 
 	private async Task<IEnumerable<string>> AutoComplete(string search)
 	{
-		return FileOperationsService.GetSearchSongs(search);
+		return FileOperationsService.GetSearchSongs(search).OrderBy(each => Fastenshtein.Levenshtein.Distance(each, search));
 	}
 
 	private void HandleOnDarkModeChanged()
