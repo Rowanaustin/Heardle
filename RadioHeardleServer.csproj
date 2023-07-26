@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Fastenshtein" Version="1.0.0.8" />
     <PackageReference Include="MudBlazor" Version="6.2.2" />
   </ItemGroup>
 
