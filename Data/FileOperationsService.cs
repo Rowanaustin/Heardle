@@ -1,9 +1,12 @@
-﻿namespace RadioHeardleServer.Data
+﻿using System.Text;
+
+namespace RadioHeardleServer.Data
 {
 	public class FileOperationsService
 	{
 		private readonly static string songFile = "Data/currentSong.txt";
 		private readonly static string lastUpdatedFile = "Data/lastUpdated.txt";
+		private readonly static string songQueueFile = "Data/songQueue.txt";
 		private readonly static string songListFile = "Data/songList.txt";
 		private static readonly TimeSpan serverTimeBehind = new (8, 0, 0);
 
@@ -72,7 +75,7 @@
 
 		private void UpdateData()
 		{
-			var song = GetRandomSong();
+			var song = GetNextSong();
 
 			if (song._fileName != null)
 			{
@@ -81,29 +84,32 @@
 			}
 		}
 
-		private static SongData GetRandomSong()
+		private static SongData GetNextSong()
 		{
-			var currentSong = "";
-			if (FileExists(songFile))
-				currentSong = ReadLine(songFile, fileNameIndex);
+			var songQueue = ReadLines(songQueueFile);
 
-			var fileData = ReadLines(songListFile);
+			if (songQueue.Length == 0 || songQueue[0].Equals(""))
+				songQueue = GetNewSongQueue();
 
-			if (fileData.Length == 0)
-				return new SongData();
+			var line = songQueue[0];
+			var data = line.Split("---");
+
+			var list = songQueue.ToList();
+			list.RemoveAt(0);
+			WriteLines(songQueueFile, list);
+
+			return new SongData(data);
+		}
+
+		private static string[] GetNewSongQueue()
+		{
+			var songs = ReadLines(songListFile);
+
+			var list = songs.ToList();
 
 			Random r = new();
 
-			var line = fileData[r.Next(fileData.Length)];
-			var data = line.Split("---");
-
-			if (data[0].Equals(currentSong))
-			{
-				line = fileData[r.Next(fileData.Length)];
-				data = line.Split("---");
-			}
-
-			return new SongData(data);
+			return list.OrderBy(_ => r.Next()).ToArray();
 		}
 
 		private static string[] GetSongNameList()
@@ -209,6 +215,18 @@
 		private static void Write(string filename, string text)
 		{
 			File.WriteAllText(filename, text);
+		}
+
+		private static void WriteLines(string filename, List<string> lines)
+		{
+			var builder = new StringBuilder();
+			foreach(var line in lines)
+			{
+				builder.Append(line.Trim());
+				builder.Append('\n');
+			}
+
+			Write(filename, builder.ToString());
 		}
 
 		private static void WriteLine(string filename, int index, string line)

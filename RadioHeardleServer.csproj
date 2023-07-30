@@ -10,6 +10,7 @@
     <None Remove="Data\currentSong.txt" />
     <None Remove="Data\lastUpdated.txt" />
     <None Remove="Data\songList.txt" />
+    <None Remove="Data\songQueue.txt" />
     <None Remove="temp-keys\key-31882c22-69dc-43ac-bd53-62b33b0edd46.xml" />
   </ItemGroup>
 
@@ -27,6 +28,9 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Content>
     <Content Include="Data\lastUpdated.txt">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\songQueue.txt">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Content>
     <Content Include="Data\songList.txt">
