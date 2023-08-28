@@ -65,9 +65,13 @@
 					}
 
 					<MudProgressLinear Color="@BarColour" Value="@BufferValue" Class="my-7" Size="Size.Medium" />
-					<MudProgressLinear Color="Color.Primary" Value="@Value" Class="my-7" Size="Size.Large" />
-					<MudSwitch @bind-Checked="@PlaySwitch" Label="Play" Color="Color.Success" />
-				</MudCardContent>
+
+					@if (!_guessInputFocused || _breakpoint.CompareTo(Breakpoint.Sm) >= 1)
+					{
+						<MudProgressLinear Color="Color.Primary" Value="@Value" Class="my-7" Size="Size.Large" />
+						<MudSwitch @bind-Checked="@PlaySwitch" Label="Play" Color="Color.Success" />
+					}
+					</MudCardContent>
 			</MudCard>
 
 			<MudText hidden="@gameIncomplete" Align="Align.Center" Typo="Typo.h4">@_songName</MudText>
