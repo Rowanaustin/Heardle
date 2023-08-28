@@ -279,7 +279,10 @@
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)
+		{
 			await BreakpointListener.Subscribe(breakpoint => _breakpoint = breakpoint);
+			_breakpoint = BreakpointListener.GetBreakpoint().Result;
+		}
 	}
 
 	private void HandleStorageState()
