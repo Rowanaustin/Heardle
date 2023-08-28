@@ -1,6 +1,7 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 @using MudBlazor
+@using MudBlazor.Services
 @using RadioHeardleServer.Data;
 @using System.Globalization;
 @using Fastenshtein;
@@ -48,44 +49,49 @@
 	}
 	else
 	{
-	<MudContainer >
-		<MudStack Row=true Justify="Justify.SpaceBetween">
-				<MudButton Color="Color.Surface" OnClick="OnOpenHelp" Disabled="@WaitingToShowStats">About</MudButton>
-				<MudButton Color="Color.Surface" OnClick="OnOpenStats" Disabled="@WaitingToShowStats">Stats</MudButton>
-		</MudStack>
-	<MudStack>
-		<MudCard >
-			<MudCardContent>
-				<MudText Align="Align.Right"><h1>Radioheardle</h1></MudText>
-				<MudText Align="Align.Right">@_editionDate</MudText>
-				<MudProgressLinear Color="@BarColour" Value="@BufferValue" Class="my-7" Size="Size.Medium" />
-				<MudProgressLinear Color="Color.Primary" Value="@Value" Class="my-7" Size="Size.Large" />
-				<MudSwitch @bind-Checked="@PlaySwitch" Label="Play" Color="Color.Success" />
-			</MudCardContent>
-		</MudCard>
+		<MudContainer>
+			<MudStack Row=true Justify="Justify.SpaceBetween">
+					<MudButton Color="Color.Surface" OnClick="OnOpenHelp" Disabled="@WaitingToShowStats">About</MudButton>
+					<MudButton Color="Color.Surface" OnClick="OnOpenStats" Disabled="@WaitingToShowStats">Stats</MudButton>
+			</MudStack>
+		<MudStack>
+			<MudCard >
+				<MudCardContent>
 
-		<MudText hidden="@gameIncomplete" Align="Align.Center" Typo="Typo.h4">@_songName</MudText>
-		<MudStack Justify="Justify.Center">
-			<MudChip hidden="@gameIncomplete" Color="@chipColor" Text="@chipText"></MudChip>
-		</MudStack>
+					@if (!_guessInputFocused || _breakpoint.CompareTo(Breakpoint.Sm) >= 1)
+					{
+						<MudText Align="Align.Right"><h1>Radioheardle</h1></MudText>
+						<MudText Align="Align.Right">@_editionDate</MudText>
+					}
+
+					<MudProgressLinear Color="@BarColour" Value="@BufferValue" Class="my-7" Size="Size.Medium" />
+					<MudProgressLinear Color="Color.Primary" Value="@Value" Class="my-7" Size="Size.Large" />
+					<MudSwitch @bind-Checked="@PlaySwitch" Label="Play" Color="Color.Success" />
+				</MudCardContent>
+			</MudCard>
+
+			<MudText hidden="@gameIncomplete" Align="Align.Center" Typo="Typo.h4">@_songName</MudText>
+			<MudStack Justify="Justify.Center">
+				<MudChip hidden="@gameIncomplete" Color="@chipColor" Text="@chipText"></MudChip>
+			</MudStack>
 		
-		<MudCard hidden="@GameCompleted">
-			<MudCardContent>
-				<MudStack Row=true Spacing="4">
-					<MudButton @onclick="@HandleOnSkip" Disabled="@GameCompleted">@Skip</MudButton>
-					<MudButton @onclick="@HandleOnGuess" Disabled="@GameCompleted">Guess</MudButton>
-				</MudStack>
-				<MudAutocomplete T="string" @bind-Value="@GuessText" Disabled="@GameCompleted" SearchFunc="@AutoComplete" MaxItems=5>
-						<MoreItemsTemplate>
-							<MudText Align="Align.Center" Class="px-4 py-1">
-								...
-							</MudText>
-						</MoreItemsTemplate>
-					</MudAutocomplete>
-			</MudCardContent>
-		</MudCard>
+			<MudCard hidden="@GameCompleted">
+				<MudCardContent>
+					<MudStack Row=true Spacing="4">
+						<MudButton @onclick="@HandleOnSkip" Disabled="@GameCompleted">@Skip</MudButton>
+						<MudButton @onclick="@HandleOnGuess" Disabled="@GameCompleted">Guess</MudButton>
+					</MudStack>
+					<MudAutocomplete T="string" @bind-Value="@GuessText" Disabled="@GameCompleted" SearchFunc="@AutoComplete" MaxItems=5 @onfocus="HandleOnGuessFocus" OnBlur="HandleOnGuessBlur">
+							<MoreItemsTemplate>
+								<MudText Align="Align.Center" Class="px-4 py-1">
+									...
+								</MudText>
+							</MoreItemsTemplate>
+						</MudAutocomplete>
+				</MudCardContent>
+			</MudCard>
 
-	</MudStack>
+		</MudStack>
 
 		<!-- STATS -->
 			<MudOverlay Style="opacity:0.99" @bind-Visible="_statsVisible" DarkBackground="true">
@@ -208,6 +214,8 @@
 
 	private string _guesses = "";
 
+	private bool _guessInputFocused = false;
+
 	private string _audioAddress;
 	private string _songName;
 	private string _editionDate;
@@ -223,6 +231,10 @@
 	private bool loaded = false;
 
 	private bool _disposed;
+
+	[Inject] IBreakpointService BreakpointListener { get; set; }
+
+	private Breakpoint _breakpoint;
 
 	public void Dispose() => _disposed = true;
 
@@ -262,6 +274,12 @@
 		HandleStorageState();
 		RefreshStats();
 		StateHasChanged();
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+			await BreakpointListener.Subscribe(breakpoint => _breakpoint = breakpoint);
 	}
 
 	private void HandleStorageState()
@@ -337,6 +355,16 @@
 			Value = 0;
 			StateHasChanged();
 		}
+	}
+
+	private void HandleOnGuessFocus()
+	{
+		_guessInputFocused = true;
+	}
+
+	private void HandleOnGuessBlur()
+	{
+		_guessInputFocused = false;
 	}
 
 	private void OnOpenHelp()
