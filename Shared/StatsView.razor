@@ -41,18 +41,22 @@
 				</MudItem>
 
 				<MudItem xs="7">
-					<MudStack Row="true" Justify="Justify.Center">
-						@foreach (var name in BestScoreToday.UserTags)
-						{
-							<MudChip DisableRipple="true" Variant="Variant.Outlined" Color="Color.Success">@name</MudChip>
-						}
+					<MudStack>
 
-						@if(HasTopScoreWithoutName)
+						<MudStack Row="true" Justify="Justify.Center">
+							@foreach (var name in BestScoreToday.UserTags)
+							{
+								<MudChip DisableRipple="true" Variant="Variant.Outlined" Color="Color.Success">@name</MudChip>
+							}
+						</MudStack>
+
+						@if (HasTopScoreWithoutName)
 						{
-							<MudStack Justify="Justify.Center">
+							<MudStack Row="true" Justify="Justify.Center" AlignItems="AlignItems.Center">
 								<MudText Typo="Typo.caption" Color="Color.Success"><i>Add your name in 'About'</i></MudText>
 							</MudStack>
 						}
+
 					</MudStack>
 				</MudItem>
 			}
