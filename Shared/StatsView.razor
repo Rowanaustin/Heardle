@@ -66,7 +66,7 @@
 
 	<MudCard hidden="@(!GameComplete)">
 		<MudCardContent>
-				<MudTextField @bind-Value="ResultText" onclick="@AutoHighlight" Lines="4" Variant="Variant.Outlined" Label="Copy this text to show your mates" ReadOnly="true"></MudTextField>
+				<MudTextField @bind-Value="ResultText" onclick="@AutoHighlight()" Lines="4" Variant="Variant.Outlined" Label="Copy this text to show your mates" ReadOnly="true"></MudTextField>
 		</MudCardContent>
 	</MudCard>
 

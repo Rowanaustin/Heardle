@@ -235,7 +235,12 @@ namespace RadioHeardleServer.Data
 		private static void AppendBestScore(BestUserData data)
 		{
 			var bestUsers = GetBestUserTags();
+
+			if (bestUsers.Contains(data.UserTags[0]))
+				return;
+
 			var bestScore = GetBestUserScore();
+
 			bestUsers.AddRange(data.UserTags);
 
 			UpdateBestScoreFiles(bestScore.ToString(), bestUsers);
