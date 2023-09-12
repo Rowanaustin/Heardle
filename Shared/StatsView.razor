@@ -1,0 +1,110 @@
+﻿@using MudBlazor
+@using RadioHeardleServer.Data;
+
+<MudStack>
+	<MudCard>
+		<MudCardContent>
+			<MudStack Justify="Justify.SpaceBetween" Row=true>
+				<MudStack>
+				<MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Surface" OnClick="@OnClose">Close</MudButton>
+				<MudItem></MudItem>
+						</MudStack>
+				<MudText Class="pa-4" Align="Align.Right" Color="Color.Info"><h2>Stats</h2></MudText>
+			</MudStack>
+			<MudGrid Justify="Justify.SpaceEvenly">
+				<MudTr>
+					<StatsBadge Description="Played" Stat="@Statistics.GamesPlayed"></StatsBadge>
+				</MudTr>
+				<MudTr>
+					<StatsBadge Description="Win Percent" Stat="@Statistics.WinPercentage" IsPercent=true></StatsBadge>
+				</MudTr>
+				<MudTr>
+					<StatsBadge Description="Current Streak" Stat="@Statistics.StreakCount"></StatsBadge>
+				</MudTr>
+			</MudGrid>
+			
+			<MudChart  ChartType="ChartType.Bar" ChartOptions="@chartOptions" ChartSeries="@Series" XAxisLabels="@XAxisLabels" Width="100%" Height="350px"></MudChart>
+			<MudSpacer ></MudSpacer>
+			<MudText Class="pa-2" Align="Align.Center">Guess Distribution</MudText>
+			</MudCardContent>
+	</MudCard>
+
+	<MudCard>
+		<MudStack Row="true" Justify="Justify.Center" Spacing="4" AlignItems="AlignItems.Center">
+
+			@if (BestScoreToday.Score < 6)
+			{
+				<MudItem xs="3">
+					<MudPaper Elevation="0">
+						<StatsBadge Description="Best Today" Stat="@BestScoreToday.Score"></StatsBadge>
+					</MudPaper>
+				</MudItem>
+
+				<MudItem xs="7">
+					<MudStack Row="true" Justify="Justify.Center">
+						@foreach (var name in BestScoreToday.UserTags)
+						{
+							<MudChip DisableRipple="true" Variant="Variant.Outlined" Color="Color.Success">@name</MudChip>
+						}
+
+						@if(HasTopScoreWithoutName)
+						{
+							<MudStack Justify="Justify.Center">
+								<MudText Typo="Typo.caption" Color="Color.Info"><i>Add your name in 'About'</i></MudText>
+							</MudStack>
+						}
+					</MudStack>
+				</MudItem>
+			}
+
+		</MudStack>
+	</MudCard>
+
+	<MudCard hidden="@(!GameComplete)">
+		<MudCardContent>
+				<MudTextField @bind-Value="ResultText" onclick="@AutoHighlight" Lines="4" Variant="Variant.Outlined" Label="Copy this text to show your mates" ReadOnly="true"></MudTextField>
+		</MudCardContent>
+	</MudCard>
+
+
+</MudStack>
+
+@code {
+	[Parameter]
+	public StatisticsData Statistics { get; set; }
+
+	[Parameter]
+	public string ResultText { get; set; }
+
+	[Parameter]
+	public bool GameComplete { get; set; }
+
+	[Parameter]
+	public EventCallback OnClose { get; set; }
+
+	[Parameter]
+	public List<ChartSeries> Series { get; set; }
+
+	[Parameter]
+	public string[] XAxisLabels { get; set; }
+
+	[Parameter]
+	public BestUserData BestScoreToday { get; set; }
+
+	[Parameter]
+	public bool HasTopScoreWithoutName { get; set; }
+
+
+	private ChartOptions chartOptions = new ChartOptions()
+	{
+		LineStrokeWidth = 20.0,
+		YAxisTicks = 1,
+		DisableLegend = true,
+		ChartPalette = new string[] { Colors.Green.Default, Colors.LightBlue.Default }
+	};
+
+	private string AutoHighlight()
+	{
+		return "window.focusedElement = this;  setTimeout(function () { window.focusedElement.setSelectionRange(0, window.focusedElement.value.length) }, 100);";
+	}
+}

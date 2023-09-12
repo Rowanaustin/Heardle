@@ -16,6 +16,9 @@ namespace RadioHeardleServer.Shared
 		private int _lastVersionWon;
 		private int _streak;
 		private bool _darkSetting;
+		private string _userTag;
+		private bool _dayScorePushed;
+		private string _dayScorePushedWithTag;
 
 		public int Version { get => _version; }
 		public string Guesses { get => _guesses; }
@@ -24,13 +27,17 @@ namespace RadioHeardleServer.Shared
 		public int LastVersionWon { get => _lastVersionWon;}
 		public int Streak { get => _streak; }
 		public bool DarkSetting { get => _darkSetting; set => _darkSetting = value; }
+		public string UserTag { get => _userTag; }
+		public bool DayScorePushed { get => _dayScorePushed; set => _dayScorePushed = value; }
+
+		public string DayScorePushedWithTag { get => _dayScorePushedWithTag; set => _dayScorePushedWithTag = value; }
 
 		public void Setup(ProtectedBrowserStorage localStore)
 		{
 			_protectedStore = localStore;
 		}
 
-		public void UpdateStorage(int version, string guesses, bool complete, int[] results, int lastVersionWon, int streak)
+		public void UpdateStorage(int version, string guesses, bool complete, int[] results, int lastVersionWon, int streak, string userTag, bool dayScorePushed)
 		{
 			_version = version;
 			_guesses = guesses;
@@ -38,6 +45,8 @@ namespace RadioHeardleServer.Shared
 			_results = results;
 			_lastVersionWon = lastVersionWon;
 			_streak = streak;
+			_userTag = userTag;
+			_dayScorePushed = dayScorePushed;
 		}
 
 		public async Task LoadStorage()
@@ -191,6 +200,70 @@ namespace RadioHeardleServer.Shared
 				}
 				DarkSetting = false;
 			}
+
+			try
+			{
+				var userTag = await _protectedStore.GetAsync<string>("userTag");
+				_userTag = userTag.Success && userTag.Value != null ? userTag.Value : "";
+				if (userTag.Value == null)
+					Console.WriteLine("userTag.Value == null");
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine("_protectedStore error: " + e.Message);
+				try
+				{
+					await _protectedStore.DeleteAsync("userTag");
+				}
+				catch (Exception iex)
+				{
+					Console.WriteLine("Browser storage Delete error: " + iex.Message);
+				}
+
+				_userTag = "";
+			}
+
+			try
+			{
+				var dayScorePushed = await _protectedStore.GetAsync<bool>("dayScorePushed");
+				_dayScorePushed = dayScorePushed.Success ? dayScorePushed.Value : false;
+				if (!dayScorePushed.Success)
+					Console.WriteLine("dayScorePushed.Value == null");
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine("_protectedStore error: " + e.Message);
+				try
+				{
+					await _protectedStore.DeleteAsync("dayScorePushed");
+				}
+				catch (Exception iex)
+				{
+					Console.WriteLine("Browser storage Delete error: " + iex.Message);
+				}
+				_dayScorePushed = false;
+			}
+
+			try
+			{
+				var dayScorePushedWithTag = await _protectedStore.GetAsync<string>("dayScorePushedWithTag");
+				_dayScorePushedWithTag = dayScorePushedWithTag.Success && dayScorePushedWithTag.Value != null ? dayScorePushedWithTag.Value : "";
+				if (dayScorePushedWithTag.Value == null)
+					Console.WriteLine("dayScorePushedWithTag.Value == null");
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine("_protectedStore error: " + e.Message);
+				try
+				{
+					await _protectedStore.DeleteAsync("dayScorePushedWithTag");
+				}
+				catch (Exception iex)
+				{
+					Console.WriteLine("Browser storage Delete error: " + iex.Message);
+				}
+				_dayScorePushedWithTag = "";
+			}
 		}
 
 		public async Task CommitStorage()
@@ -202,6 +275,9 @@ namespace RadioHeardleServer.Shared
 			await _protectedStore.SetAsync("lastVersionCompleted", _lastVersionWon);
 			await _protectedStore.SetAsync("streak", _streak);
 			await _protectedStore.SetAsync("darkMode", _darkSetting);
+			await _protectedStore.SetAsync("userTag", _userTag);
+			await _protectedStore.SetAsync("dayScorePushed", _dayScorePushed);
+			await _protectedStore.SetAsync("dayScorePushedWithTag", _dayScorePushedWithTag);
 		}
 	}
 }

@@ -4,7 +4,7 @@ namespace RadioHeardleServer.Data
 {
 	public static class ResultGenerator
 	{
-		private static readonly string whitebox = "2B1C";
+		private static readonly string whitebox = "2B1B";
 		private static readonly string yellowbox = "1F7E8";
 		private static readonly string greenbox = "1F7E9";
 

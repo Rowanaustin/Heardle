@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace RadioHeardleServer.Data
 {
@@ -8,13 +9,20 @@ namespace RadioHeardleServer.Data
 		private readonly static string lastUpdatedFile = "Data/lastUpdated.txt";
 		private readonly static string songQueueFile = "Data/songQueue.txt";
 		private readonly static string songListFile = "Data/songList.txt";
+		private readonly static string bestScoreFile = "Data/bestScore.txt";
+		private readonly static string bestUsersFile = "Data/bestUsers.txt";
 		private static readonly TimeSpan serverTimeBehind = new (8, 0, 0);
 
+		// song file
 		private readonly static int fileNameIndex = 0;
 		private readonly static int songNameIndex = 1;
 
+		// last updated file
 		private readonly static int updatedDateIndex = 0;
 		private readonly static int versionIndex = 1;
+
+		// best score file
+		private readonly static int bestScoreIndex = 0;
 
 		private readonly bool isProduction;
 
@@ -36,13 +44,38 @@ namespace RadioHeardleServer.Data
 			var songData = new SongData(fileName, songName);
 			var updated = GetTimeUpdated();
 			var version = GetVersion();
+			var bestScore = GetBestUserScore();
+			var bestUsers = GetBestUserTags();
+			var bestUserData = new BestUserData(bestScore, bestUsers);
 
-			return new DisplayData(songData, updated, version);
+			return new DisplayData(songData, updated, version, bestUserData);
 		}
 
 		public List<string> GetSearchSongs(string searchStr)
 		{
 			return _songNamesList.Where(s => s.Contains(searchStr, StringComparison.InvariantCultureIgnoreCase)).ToList();
+		}
+
+		public BestUserData GetBestUserData()
+		{
+			var currentBest = GetBestUserScore();
+			var currentUsers = GetBestUserTags();
+
+			return new BestUserData(currentBest, currentUsers);
+		}
+
+		public void PushBestScoreData(BestUserData bestUserData)
+		{
+			var currentBest = GetBestUserScore();
+
+			if (bestUserData.Score == currentBest)
+			{
+				AppendBestScore(bestUserData);
+			}
+			else if (bestUserData.Score < currentBest)
+			{
+				ReplaceBestScore(bestUserData);
+			}
 		}
 
 		private bool NeedNewData()
@@ -81,6 +114,8 @@ namespace RadioHeardleServer.Data
 			{
 				UpdateVersionFile();
 				Write(songFile, song.ToString());
+
+				ReplaceBestScore(new BestUserData(6, new List<string>()));
 			}
 		}
 
@@ -165,6 +200,62 @@ namespace RadioHeardleServer.Data
 				else
 					return int.Parse(line.Trim());
 			}
+		}
+
+		private static int GetBestUserScore()
+		{
+			if (!FileExists(bestScoreFile))
+				return 6;
+			else
+			{
+				var line = ReadLine(bestScoreFile, bestScoreIndex);
+
+				if (line == null || line.Trim().Length == 0)
+					return 6;
+				else
+					return int.Parse(line.Trim());
+			}
+		}
+
+		private static List<string> GetBestUserTags()
+		{
+			if (!FileExists(bestScoreFile))
+				return new List<string>();
+			else
+			{
+				var lines = ReadLines(bestUsersFile);
+
+				if (lines == null)
+					return new List<string>();
+				else
+					return lines.Where(l => l.Trim().Length > 0).ToList();
+			}
+		}
+
+		private static void AppendBestScore(BestUserData data)
+		{
+			var bestUsers = GetBestUserTags();
+			var bestScore = GetBestUserScore();
+			bestUsers.AddRange(data.UserTags);
+
+			UpdateBestScoreFiles(bestScore.ToString(), bestUsers);
+		}
+
+		private static void ReplaceBestScore(BestUserData data)
+		{
+			UpdateBestScoreFiles(data.Score.ToString(), data.UserTags );
+		}
+
+		private static void UpdateBestScoreFiles(string score, List<string> users)
+		{
+			string usersStr = "";
+			foreach(var user in users)
+			{
+				usersStr += user + "\n";
+			}
+
+			WriteLine(bestScoreFile, bestScoreIndex, score);
+			Write(bestUsersFile, usersStr);
 		}
 
 		private void UpdateVersionFile()

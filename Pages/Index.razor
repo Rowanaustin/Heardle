@@ -98,42 +98,10 @@
 		</MudStack>
 
 		<!-- STATS -->
-			<MudOverlay Style="opacity:0.99" @bind-Visible="_statsVisible" DarkBackground="true">
-		<MudStack>
-			<MudCard>
-				<MudCardContent>
-					<MudStack Justify="Justify.SpaceBetween" Row=true>
-						<MudStack>
-						<MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Surface" OnClick="OnCloseOverlay">Close</MudButton>
-						<MudItem></MudItem>
-								</MudStack>
-						<MudText Class="pa-4" Align="Align.Right" Color="Color.Info"><h2>Stats</h2></MudText>
-					</MudStack>
-					<MudGrid Justify="Justify.SpaceEvenly">
-						<MudTr>
-							<StatsBadge Description="Played" Stat="@_gamesPlayed"></StatsBadge>
-						</MudTr>
-						<MudTr>
-							<StatsBadge Description="Win Percent" Stat="@_winPercentage" IsPercent=true></StatsBadge>
-						</MudTr>
-						<MudTr>
-							<StatsBadge Description="Current Streak" Stat="@_streak"></StatsBadge>
-						</MudTr>
-					</MudGrid>
-			
-					<MudChart  ChartType="ChartType.Bar" ChartOptions="@chartOptions" ChartSeries="@Series" XAxisLabels="@XAxisLabels" Width="100%" Height="350px"></MudChart>
-					<MudSpacer ></MudSpacer>
-					<MudText Class="pa-2" Align="Align.Center">Guess Distribution</MudText>
-					</MudCardContent>
-			</MudCard>
-			<MudCard hidden="@gameIncomplete">
-				<MudCardContent>
-						<MudTextField @bind-Value="ResultText" onclick="@AutoHighlight()" Lines="4" Variant="Variant.Outlined" Label="Copy this text to show your mates" ReadOnly="true"></MudTextField>
-				</MudCardContent>
-			</MudCard>
-
-
-		</MudStack>
+		<MudOverlay Style="opacity:0.99" @bind-Visible="_statsVisible" DarkBackground="true">
+		
+			<StatsView GameComplete="GameCompleted" OnClose="OnCloseOverlay" ResultText="@ResultText" Series="Series" Statistics="Statistics" XAxisLabels="XAxisLabels" 
+				BestScoreToday="BestUserData" HasTopScoreWithoutName="@(GameCompleted && _guesses.Length == BestUserData.Score && CookiesService.DayScorePushedWithTag.Length < 1)"/>
 
 		</MudOverlay>
 
@@ -155,16 +123,22 @@
 							<MudText Typo="Typo.body2">The song is randomly chosen each day from the first 7 studio albums.</MudText>
 					</MudCardContent>
 				</MudCard>
-					<MudCardContent>
-						<MudCard>
-							<MudCardContent>
-								<MudSwitch @bind-Checked="IsDarkMode" Label="Dark Mode" Color="Color.Surface" />
-							</MudCardContent>
-						</MudCard>
-					</MudCardContent>
-						<MudCard>
 
+				<MudCard>
+					<MudCardContent>
+						<MudStack Row="true">
+							<MudTextField T="string" Label="@(CookiesService.DayScorePushedWithTag.Length < 1 ? "Your Name" : "Already submitted today")" @bind-Text="@_userTag" @bind-Disabled="_userTagNotInEdit"></MudTextField>
+							<MudButton Disabled="@(CookiesService.DayScorePushedWithTag.Length > 0)" OnClick="HandleOnUserTagEditToggle" @bind-Color="_userTagEditToggleButtonColor">@_userTagEditToggleButtonText</MudButton>
+						</MudStack>
+					</MudCardContent>
 				</MudCard>
+
+				<MudCard>
+					<MudCardContent>
+						<MudSwitch @bind-Checked="IsDarkMode" Label="Dark Mode" Color="Color.Surface" />
+					</MudCardContent>
+				</MudCard>
+					
 			</MudStack>
 		</MudOverlay>
 
@@ -191,6 +165,12 @@
 	public bool WaitingToShowStats { get; set; } = false;
 	public int Value { get; set; } = 0;
 	public float BufferValue { get; set; } = _bufferPart * _sectionDurations[0];
+
+	public StatisticsData Statistics = new();
+
+	public BestUserData BestUserData;
+	private string _userTag;
+	private bool _dayScorePushed = false;
 
 	public List<ChartSeries> Series { get; set; }
 	public string[] XAxisLabels { get; set; }
@@ -220,16 +200,17 @@
 
 	private bool _guessInputFocused = false;
 
+	private bool _userTagNotInEdit = true;
+
+	private Color _userTagEditToggleButtonColor = Color.Info;
+	private string _userTagEditToggleButtonText = "Change";
+
 	private string _audioAddress;
 	private string _songName;
 	private string _editionDate;
 	private int _editionVersion;
 	private int[] _currentResults;
 	private int _lastVersionWon;
-	private int _streak;
-
-	private int _winPercentage;
-	private int _gamesPlayed;
 
 	private bool loading = true;
 	private bool loaded = false;
@@ -251,27 +232,15 @@
 		set { _isDarkMode = value; HandleOnDarkModeChanged(); }
 	}
 
-	private ChartOptions chartOptions = new ChartOptions()
-	{
-		LineStrokeWidth = 20.0,
-		YAxisTicks = 1,
-		DisableLegend = true,
-		ChartPalette = new string[] { Colors.Green.Default, Colors.LightBlue.Default }
-	};
-
-	private string AutoHighlight()
-	{
-		return "window.focusedElement = this;  setTimeout(function () { window.focusedElement.setSelectionRange(0, window.focusedElement.value.length) }, 100);";
-	}
-
 	protected override async Task OnInitializedAsync()
 	{
 		RefreshStats();
-		var songData = FileOperationsService.GetData();
-		_audioAddress = "./Audio/" + songData._songData._fileName;
-		_songName = songData._songData._songName;
-		_editionDate = songData._updateDate.DayOfWeek + " " + songData._updateDate.Date.ToString("d", new CultureInfo("en-GB"));
-		_editionVersion = songData._version;
+		var displayData = FileOperationsService.GetData();
+		_audioAddress = "./Audio/" + displayData._songData._fileName;
+		_songName = displayData._songData._songName;
+		_editionDate = displayData._updateDate.DayOfWeek + " " + displayData._updateDate.Date.ToString("d", new CultureInfo("en-GB"));
+		_editionVersion = displayData._version;
+		BestUserData = displayData._bestUserData;
 		_jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/SoundScripts.js");
 		CookiesService.Setup(ProtectedLocalStore);
 		await CookiesService.LoadStorage();
@@ -293,15 +262,17 @@
 	{
 		_isDarkMode = CookiesService.DarkSetting;
 
+		_userTag = CookiesService.UserTag;
+
 		_currentResults = CookiesService.Results;
 
 		if (CookiesService.LastVersionWon +1  < _editionVersion )
 		{
-			_streak = 0;
+			Statistics.StreakCount = 0;
 		}
 		else
 		{
-			_streak = CookiesService.Streak;
+			Statistics.StreakCount = CookiesService.Streak;
 		}
 
 		_lastVersionWon = CookiesService.LastVersionWon;
@@ -309,6 +280,8 @@
 		if (CookiesService.Version == _editionVersion)
 		{
 			_guesses = CookiesService.Guesses;
+
+			_dayScorePushed = CookiesService.DayScorePushed;
 
 			for (int i = 0; i <= _guesses.Length; i++)
 			{
@@ -322,10 +295,20 @@
 			else
 				HandleSkipPosition();
 		}
+		else
+		{
+			CookiesService.DayScorePushedWithTag = "";
+			CookiesService.CommitStorage();
+		}
 
 		loading = false;
 		loaded = true;
 		StateHasChanged();
+	}
+
+	private void UpdateCookies()
+	{
+		CookiesService.UpdateStorage(_editionVersion, _guesses, GameCompleted, _currentResults, _lastVersionWon, Statistics.StreakCount, _userTag, _dayScorePushed);
 	}
 
 	private async Task<IEnumerable<string>> AutoComplete(string search)
@@ -338,6 +321,33 @@
 		StateHasChanged();
 		CookiesService.DarkSetting = _isDarkMode;
 		CookiesService.CommitStorage();
+	}
+
+	private void HandleOnUserTagSet()
+	{
+		UpdateCookies();
+
+		if (CookiesService.DayScorePushed && CookiesService.DayScorePushedWithTag.Length < 1)
+			UpdateDaySubmission();
+
+		CookiesService.CommitStorage();
+	}
+
+	private void HandleOnUserTagEditToggle()
+	{
+		_userTagNotInEdit = !_userTagNotInEdit;
+
+		if (_userTagNotInEdit)
+		{
+			_userTagEditToggleButtonColor = Color.Info;
+			_userTagEditToggleButtonText = "Change";
+			HandleOnUserTagSet();
+		}
+		else
+		{
+			_userTagEditToggleButtonColor = Color.Success;
+			_userTagEditToggleButtonText = "Confirm";
+		}
 	}
 
 	private async void HandleOnPlayChanged()
@@ -487,16 +497,22 @@
 		{
 			if (win)
 			{
-				_streak += 1;
+				Statistics.StreakCount += 1;
 				_lastVersionWon = _editionVersion;
 			}
 			else
 			{
-				_streak = 0;
+				Statistics.StreakCount = 0;
 			}
 		}
 
 		RefreshStats();
+
+		if (!_dayScorePushed)
+		{
+			UpdateDaySubmission();
+			CookiesService.CommitStorage();
+		}
 
 		ResultText = ResultGenerator.GetResultText(_numGuesses, _guesses, _editionDate);
 
@@ -509,9 +525,13 @@
 		await ProcessCompletion();
 	}
 
-	private void UpdateCookies()
+	private void UpdateDaySubmission()
 	{
-		CookiesService.UpdateStorage(_editionVersion, _guesses, GameCompleted, _currentResults, _lastVersionWon, _streak);
+		var thisUserData = new BestUserData(_guesses.Length, new List<string>() { CookiesService.UserTag });
+		FileOperationsService.PushBestScoreData(thisUserData);
+		_dayScorePushed = true;
+		CookiesService.DayScorePushedWithTag = _userTag;
+		BestUserData = FileOperationsService.GetBestUserData();
 	}
 
 	private async Task ProcessCompletion()
@@ -528,17 +548,22 @@
 	{
 		var results = CookiesService.Results != null ? CookiesService.Results : new int[6];
 
-		_gamesPlayed = 0;
+		var gamesPlayed = 0;
+		var winPercentage = 0;
+
 		foreach (var games in results)
 		{
-			_gamesPlayed += games;
+			gamesPlayed += games;
 		}
 
-		if (_gamesPlayed != 0)
+		if (gamesPlayed != 0)
 		{
-			var losePercentage = (float)results[0] / _gamesPlayed;
-			_winPercentage = 100 - (int)(losePercentage * 100);
+			var losePercentage = (float)results[0] / gamesPlayed;
+			winPercentage = 100 - (int)(losePercentage * 100);
 		}
+
+		Statistics.WinPercentage = winPercentage;
+		Statistics.GamesPlayed = gamesPlayed;
 
 		var withoutCurrent = new int[5];
 		Array.Copy(results, 1, withoutCurrent, 0, 5);
