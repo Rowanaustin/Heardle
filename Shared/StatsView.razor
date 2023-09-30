@@ -9,7 +9,7 @@
 				<MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Surface" OnClick="@OnClose">Close</MudButton>
 				<MudItem></MudItem>
 						</MudStack>
-				<MudText Class="pa-4" Align="Align.Right" Color="Color.Info"><h2>Stats</h2></MudText>
+				<MudText Class="pa-4" Align="Align.Right" Color="Color.Primary"><h2>Stats</h2></MudText>
 			</MudStack>
 			<MudGrid Justify="Justify.SpaceEvenly">
 				<MudTr>
@@ -64,7 +64,7 @@
 
 	<MudCard hidden="@(!GameComplete)">
 		<MudCardContent>
-				<MudTextField @bind-Value="ResultText" onclick="@AutoHighlight()" Lines="4" Variant="Variant.Outlined" Label="Copy this text to show your mates" ReadOnly="true"></MudTextField>
+				<MudTextField @bind-Value="ResultText" onclick="@AutoHighlight()" Lines="4" Variant="Variant.Outlined" Label="Result" ReadOnly="true"></MudTextField>
 		</MudCardContent>
 	</MudCard>
 
