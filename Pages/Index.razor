@@ -60,8 +60,12 @@
 
 					@if (!_guessInputFocused || _breakpoint.CompareTo(Breakpoint.Sm) >= 1)
 					{
-						<MudText Align="Align.Right"><h1>Radioheardle</h1></MudText>
-						<MudText Align="Align.Right">@_editionDate</MudText>
+							<MudStack Row="true" Justify="Justify.SpaceBetween">
+								<MudText Align="Align.Left"><h1>Radioheardle</h1></MudText>
+								<MudText Align="Align.Right"><h1>@_editionVersion.ToString()</h1></MudText>
+							</MudStack>
+
+						<MudText Typo="Typo.body2" Align="Align.Right">@_editionDate</MudText>
 					}
 
 					<MudProgressLinear Color="@BarColour" Value="@BufferValue" Class="my-7" Size="Size.Medium" />
@@ -147,7 +151,7 @@
 
 </MudContainer>
 
-<MudThemeProvider IsDarkMode="@_isDarkMode"></MudThemeProvider>
+<MudThemeProvider Theme="RadioheardleTheme" IsDarkMode="@_isDarkMode"></MudThemeProvider>
 
 
 <audio id="audioPlayer" src='@_audioAddress' type="audio/mpeg" />
@@ -231,6 +235,19 @@
 		get { return _isDarkMode; }
 		set { _isDarkMode = value; HandleOnDarkModeChanged(); }
 	}
+
+	public MudTheme RadioheardleTheme = new MudTheme()
+	{
+		Palette = new PaletteLight()
+		{
+			Tertiary = Colors.Indigo.Default
+		},
+
+		PaletteDark = new PaletteDark()
+		{
+			Tertiary = Colors.Indigo.Default
+		},
+	};
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -514,7 +531,7 @@
 			CookiesService.CommitStorage();
 		}
 
-		ResultText = ResultGenerator.GetResultText(_numGuesses, _guesses, _editionDate);
+		ResultText = ResultGenerator.GetResultText(_numGuesses, _guesses, _editionVersion.ToString());
 
 		chipColor = win ? Color.Success : Color.Error;
 		chipText = win ? "Success" : "Failure";

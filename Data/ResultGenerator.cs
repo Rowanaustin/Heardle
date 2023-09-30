@@ -10,7 +10,17 @@ namespace RadioHeardleServer.Data
 
 		public static string GetResultText(int guessesAllowed, string guessedOrSkipped, string edition)
 		{
-			StringBuilder unicodeBuilder = new StringBuilder("Radioheardle: " + edition + "\n");
+			StringBuilder unicodeBuilder = new StringBuilder("Radioheardle: " + edition + ":");
+
+			if (guessedOrSkipped.Length >= guessesAllowed)
+				unicodeBuilder.Append('X');
+			else
+				unicodeBuilder.Append(guessedOrSkipped.Length);
+
+			unicodeBuilder.Append("/");
+			unicodeBuilder.Append(guessesAllowed);
+
+			unicodeBuilder.Append("\n");
 
 			if (guessedOrSkipped.Length > 0)
 			{
