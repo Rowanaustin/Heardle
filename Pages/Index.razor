@@ -54,7 +54,6 @@
 					<MudButton Color="Color.Surface" OnClick="OnOpenHelp" Disabled="@WaitingToShowStats">About</MudButton>
 					<MudButton Color="Color.Surface" OnClick="OnOpenStats" Disabled="@WaitingToShowStats">Stats</MudButton>
 			</MudStack>
-		<MudStack>
 			<MudCard >
 				<MudCardContent>
 
@@ -89,17 +88,19 @@
 						<MudButton @onclick="@HandleOnSkip" Disabled="@GameCompleted">@Skip</MudButton>
 						<MudButton @onclick="@HandleOnGuess" Disabled="@GameCompleted">Guess</MudButton>
 					</MudStack>
-					<MudAutocomplete T="string" @bind-Value="@GuessText" Disabled="@GameCompleted" SearchFunc="@AutoComplete" MaxItems=5 @onfocus="HandleOnGuessFocus" OnBlur="HandleOnGuessBlur">
+@*					<MudAutocomplete T="string" @bind-Value="@GuessText" Disabled="@GameCompleted" SearchFunc="@AutoComplete" MaxItems=5 @onfocus="HandleOnGuessFocus" OnBlur="HandleOnGuessBlur">
 							<MoreItemsTemplate>
 								<MudText Align="Align.Center" Class="px-4 py-1">
 									...
 								</MudText>
 							</MoreItemsTemplate>
-						</MudAutocomplete>
+						</MudAutocomplete>*@
+
+						<AlbumSongScroller Songs="FileOperationsService.SongList"></AlbumSongScroller>
+
 				</MudCardContent>
 			</MudCard>
 
-		</MudStack>
 
 		<!-- STATS -->
 		<MudOverlay Style="opacity:0.99" @bind-Visible="_statsVisible" DarkBackground="true">
@@ -328,10 +329,10 @@
 		CookiesService.UpdateStorage(_editionVersion, _guesses, GameCompleted, _currentResults, _lastVersionWon, Statistics.StreakCount, _userTag, _dayScorePushed);
 	}
 
-	private async Task<IEnumerable<string>> AutoComplete(string search)
-	{
-		return FileOperationsService.GetSearchSongs(search).OrderBy(each => Fastenshtein.Levenshtein.Distance(each, search));
-	}
+	//private async Task<IEnumerable<string>> AutoComplete(string search)
+	//{
+	//	return FileOperationsService.GetSearchSongs(search).OrderBy(each => Fastenshtein.Levenshtein.Distance(each, search));
+	//}
 
 	private void HandleOnDarkModeChanged()
 	{

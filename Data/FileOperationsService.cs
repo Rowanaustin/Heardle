@@ -13,10 +13,6 @@ namespace RadioHeardleServer.Data
 		private readonly static string bestUsersFile = "Data/bestUsers.txt";
 		private static readonly TimeSpan serverTimeBehind = new (8, 0, 0);
 
-		// song file
-		private readonly static int fileNameIndex = 0;
-		private readonly static int songNameIndex = 1;
-
 		// last updated file
 		private readonly static int updatedDateIndex = 0;
 		private readonly static int versionIndex = 1;
@@ -26,12 +22,14 @@ namespace RadioHeardleServer.Data
 
 		private readonly bool isProduction;
 
-		private readonly string[] _songNamesList;
+		private readonly SongData[] _songList;
+
+		public SongData[] SongList => _songList;
 
 		public FileOperationsService(bool production)
 		{
 			isProduction = production;
-			_songNamesList = GetSongNameList();
+			_songList = GetSongList();
 		}
 
 		public DisplayData GetData()
@@ -39,9 +37,7 @@ namespace RadioHeardleServer.Data
 			if (NeedNewData())
 				UpdateData();
 
-			var fileName = ReadLine(songFile, fileNameIndex);
-			var songName = ReadLine(songFile, songNameIndex);
-			var songData = new SongData(fileName, songName);
+			var songData = new SongData(ReadLine(songFile,0).Split("---"));
 			var updated = GetTimeUpdated();
 			var version = GetVersion();
 			var bestScore = GetBestUserScore();
@@ -51,10 +47,10 @@ namespace RadioHeardleServer.Data
 			return new DisplayData(songData, updated, version, bestUserData);
 		}
 
-		public List<string> GetSearchSongs(string searchStr)
+/*		public List<string> GetSearchSongs(string searchStr)
 		{
-			return _songNamesList.Where(s => s.Contains(searchStr, StringComparison.InvariantCultureIgnoreCase)).ToList();
-		}
+			return _songList.Where(s => s.Contains(searchStr, StringComparison.InvariantCultureIgnoreCase)).ToList();
+		}*/
 
 		public BestUserData GetBestUserData()
 		{
@@ -86,8 +82,8 @@ namespace RadioHeardleServer.Data
 			if (!FileExists(songFile))
 				return true;
 
-			var songName = ReadLine(songFile, songNameIndex);
-			if (songName == null || songName.Length == 0)
+			var fileName = ReadLine(songFile, 0).Split("---")[0];
+			if (fileName == null || fileName.Length == 0)
 				return true;
 
 			return DateHasRolledOver();
@@ -147,13 +143,13 @@ namespace RadioHeardleServer.Data
 			return list.OrderBy(_ => r.Next()).ToArray();
 		}
 
-		private static string[] GetSongNameList()
+		private static SongData[] GetSongList()
 		{
 			var fileData = ReadLines(songListFile);
 
-			var names = fileData.Select(d => d.Split("---")[1]).ToArray();
+			var songs = fileData.Select(d => new SongData(d.Split("---"))).ToArray();
 
-			return names;
+			return songs;
 		}
 
 		private DateTime GetUkDateTime()

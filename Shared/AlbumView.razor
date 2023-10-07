@@ -1,0 +1,29 @@
+﻿@using MudBlazor
+@using RadioHeardleServer.Data;
+
+
+<MudContainer>
+	<MudStack>
+
+		<MudText Align="Align.Center">@Title</MudText>
+
+		<MudGrid Justify="Justify.Center">
+			@foreach(var song in Songs)
+			{
+				<MudChip Style="@Style" Text="@song._songName"></MudChip>
+			}
+		</MudGrid>
+
+	</MudStack>
+</MudContainer>
+
+@code {
+	[Parameter]
+	public string Title { get; set; }
+
+	[Parameter]
+	public List<SongData> Songs { get; set; }
+
+	[Parameter]
+	public string Style { get; set; }
+}

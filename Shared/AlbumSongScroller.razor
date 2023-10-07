@@ -1,0 +1,65 @@
+﻿@using MudBlazor
+@using RadioHeardleServer.Data;
+
+<MudCarousel Class="mud-width-full" Style="height:275px;" ShowArrows="false" ShowBullets="true" EnableSwipeGesture="true" AutoCycle="false" TData="object">
+
+	<MudCarouselItem Style="@($"color:{Colors.Yellow.Darken2}; background:{Colors.Shades.White};")">
+		<AlbumView Songs="@_songsByAlbum[0]" Title="Pablo Honey" Style="@($"color:{Colors.Shades.Black}; background:{Colors.Yellow.Darken2};")"></AlbumView>
+	</MudCarouselItem>
+
+	<MudCarouselItem Style="@($"color:{Colors.Pink.Lighten3}; background:{Colors.Grey.Default};")">
+		<AlbumView Songs="@_songsByAlbum[1]" Title="The Bends" Style="@($"color:{Colors.Shades.White}; background:{Colors.Pink.Lighten4};")"></AlbumView>
+	</MudCarouselItem>
+
+	<MudCarouselItem Style="@($"color:{Colors.Blue.Darken2}; background:{Colors.Shades.White};")">
+		<AlbumView Songs="@_songsByAlbum[2]" Title="Ok Computer" Style="@($"color:{Colors.Blue.Darken2}; background:{Colors.BlueGrey.Lighten3};")"></AlbumView>
+	</MudCarouselItem>
+
+	<MudCarouselItem Style="@($"color:{Colors.Shades.White}; background:{Colors.BlueGrey.Darken4};")">
+		<AlbumView Songs="@_songsByAlbum[3]" Title="Kid A" Style="@($"color:{Colors.Blue.Default}; background:{Colors.Shades.White};")"></AlbumView>
+	</MudCarouselItem>
+
+	<MudCarouselItem Style="@($"color:{Colors.Shades.Black}; background:{Colors.Red.Darken1};")">
+		<AlbumView Songs="@_songsByAlbum[4]" Title="Amnesiac" Style="@($"color:{Colors.Shades.White}; background:{Colors.Shades.Black};")"></AlbumView>
+	</MudCarouselItem>
+
+	<MudCarouselItem Style="@($"color:{Colors.Red.Darken2}; background:{Colors.LightBlue.Lighten1};")">
+		<AlbumView Songs="@_songsByAlbum[5]" Title="Hail to the Thief" Style="@($"color:{Colors.Orange.Default}; background:{Colors.Green.Lighten2};")"></AlbumView>
+	</MudCarouselItem>
+
+	<MudCarouselItem Style="@($"color:{Colors.Purple.Lighten2}; background:{Colors.Shades.Black};")">
+		<AlbumView Songs="@_songsByAlbum[6]" Title="In Rainbows" Style="@($"color:{Colors.Blue.Darken2}; background:{Colors.Orange.Default};")"></AlbumView>
+	</MudCarouselItem>
+
+</MudCarousel>
+
+
+
+@code {
+
+	[Parameter]
+	public SongData[] Songs { get; set; }
+
+	private List<List<SongData>> _songsByAlbum;
+
+	protected override void OnParametersSet()
+	{
+		ResetLists();
+
+		foreach(var song in Songs)
+		{
+			_songsByAlbum[song._albumIndex].Add(song);
+		}
+
+		for (int i = 0; i < 7; i++)
+			_songsByAlbum[i] = _songsByAlbum[i].OrderBy(s => s._trackIndex).ToList();
+	}
+
+	private void ResetLists()
+	{
+		_songsByAlbum = new();
+
+		for (int i = 0; i < 7; i++)
+			_songsByAlbum.Add(new List<SongData>());
+	}
+}
