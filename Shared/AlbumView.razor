@@ -2,15 +2,17 @@
 @using RadioHeardleServer.Data;
 
 
-<MudContainer>
+<MudContainer Style="height: 100%">
 	<MudStack Justify="Justify.SpaceEvenly">
 
-		<MudText Align="Align.Center">@Title</MudText>
+		@*<MudText Align="Align.Center">@Title</MudText>*@
 
-		<MudGrid Justify="Justify.Center">
+		<MudGrid Spacing="0" Justify="Justify.Center">
 			@foreach(var song in Songs)
 			{
+				<MudItem>
 				<MudChip OnClick="() => OnClickChip(song._songName)" Disabled="@(GuessedSongs.Contains(song._songName))" Style="@Style" Text="@song._songName"></MudChip>
+				</MudItem>
 			}
 		</MudGrid>
 

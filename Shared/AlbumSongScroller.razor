@@ -1,44 +1,74 @@
 ﻿@using MudBlazor
 @using RadioHeardleServer.Data;
 
-<MudCarousel Style="height:20pc;"
-	ShowArrows="true" 
-	ShowBullets="false" 
-	EnableSwipeGesture="true" 
-	AutoCycle="false" 
-	PreviousIcon="@Icons.Material.Filled.SkipPrevious"
-	NextIcon="@Icons.Material.Filled.SkipNext" 
-	TData="object">
+<MudStack>
+	<MudStack Row="true" Justify="Justify.Center">
+		<MudRadioGroup T="int" @bind-SelectedOption="@_currentAlbumIndex">
 
-	<MudCarouselItem Style="@($"color:{Colors.Yellow.Darken2}; background:{Colors.Shades.White};")">
-		<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[0]" Title="Pablo Honey" Style="@($"color:{Colors.Shades.Black}; background:{Colors.Yellow.Darken2};")" OnClickSong="OnClickSong"></AlbumView>
-	</MudCarouselItem>
+			<MudRadio T="int" Option="0" Style="@($"color:{Colors.Yellow.Darken2};")" Size="Size.Small"></MudRadio>
+			<MudRadio T="int" Option="1" Style="@($"color:{Colors.Brown.Lighten2};")" Size="Size.Small"></MudRadio>
+			<MudRadio T="int" Option="2" Style="@($"color:{Colors.BlueGrey.Lighten3};")" Size="Size.Small"></MudRadio>
+			<MudRadio T="int" Option="3" Style="@($"color:{Colors.BlueGrey.Darken4};")" Size="Size.Small"></MudRadio>
+			<MudRadio T="int" Option="4" Style="@($"color:{Colors.Red.Darken1};")" Size="Size.Small"></MudRadio>
+			<MudRadio T="int" Option="5" Style="@($"color:{Colors.Blue.Lighten2};")" Size="Size.Small"></MudRadio>
+			<MudRadio T="int" Option="6" Style="@($"color:{Colors.Orange.Lighten2};")" Size="Size.Small"></MudRadio>
 
-	<MudCarouselItem Style="@($"color:{Colors.Shades.White}; background:{Colors.Grey.Darken4};")">
-		<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[1]" Title="The Bends" Style="@($"color:{Colors.Shades.Black}; background:{Colors.Brown.Lighten2};")" OnClickSong="OnClickSong"></AlbumView>
-	</MudCarouselItem>
+		</MudRadioGroup>
+	</MudStack>
+	@switch(_currentAlbumIndex)
+	{
+		case 0:
+		{
+			<MudPaper Style="@($"color:{Colors.Yellow.Darken2}; background:{Colors.Shades.White};")">
+					<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[0]" Title="Pablo Honey" Style="@($"color:{Colors.Shades.Black}; background:{Colors.Yellow.Darken2}; ")" OnClickSong="OnClickSong"></AlbumView>
+			</MudPaper>
+			break;
+		}
+		case 1:
+		{
+				<MudPaper Style="@($"color:{Colors.Shades.White}; background:{Colors.Grey.Darken4};")">
+				<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[1]" Title="The Bends" Style="@($"color:{Colors.Shades.Black}; background:{Colors.Brown.Lighten2}; ")" OnClickSong="OnClickSong"></AlbumView>
+			</MudPaper>
+			break;
+		}
+		case 2:
+		{
+				<MudPaper Style="@($"color:{Colors.Blue.Darken2}; background:{Colors.Shades.White};")">
+				<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[2]" Title="Ok Computer" Style="@($"color:{Colors.Blue.Darken2}; background:{Colors.BlueGrey.Lighten3}; ")" OnClickSong="OnClickSong"></AlbumView>
+			</MudPaper>
+			break;
+		}
+		case 3:
+		{
+				<MudPaper Style="@($"color:{Colors.Shades.White}; background:{Colors.BlueGrey.Darken4};")">
+					<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[3]" Title="Kid A" Style="@($"color:{Colors.Blue.Default}; background:{Colors.Shades.White}; ")" OnClickSong="OnClickSong"></AlbumView>
+			</MudPaper>
+			break;
+		}
+		case 4:
+		{
+				<MudPaper Style="@($"color:{Colors.Shades.Black}; background:{Colors.Red.Darken1};")">
+				<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[4]" Title="Amnesiac" Style="@($"color:{Colors.Shades.White}; background:{Colors.Shades.Black}; ")" OnClickSong="OnClickSong"></AlbumView>
+			</MudPaper>
+			break;
+		}
+		case 5:
+		{
+			<MudPaper Style="@($"color:{Colors.Shades.Black}; background:{Colors.Blue.Lighten2};")">
+					<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[5]" Title="Hail to the Thief" Style="@($"color:{Colors.Green.Darken4}; background:{Colors.Red.Lighten2}; ")" OnClickSong="OnClickSong"></AlbumView>
+			</MudPaper>
+			break;
+		}
+		default:
+		{
+			<MudPaper Style="@($"color:{Colors.Yellow.Lighten2}; background:{Colors.Shades.Black};")">
+					<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[6]" Title="In Rainbows" Style="@($"color:{Colors.Blue.Darken3}; background:{Colors.Orange.Lighten2}; ")" OnClickSong="OnClickSong"></AlbumView>
+			</MudPaper>
+			break;
+		}
+	}
 
-	<MudCarouselItem Style="@($"color:{Colors.Blue.Darken2}; background:{Colors.Shades.White};")">
-		<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[2]" Title="Ok Computer" Style="@($"color:{Colors.Blue.Darken2}; background:{Colors.BlueGrey.Lighten3};")" OnClickSong="OnClickSong"></AlbumView>
-	</MudCarouselItem>
-
-	<MudCarouselItem Style="@($"color:{Colors.Shades.White}; background:{Colors.BlueGrey.Darken4};")">
-		<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[3]" Title="Kid A" Style="@($"color:{Colors.Blue.Default}; background:{Colors.Shades.White};")" OnClickSong="OnClickSong"></AlbumView>
-	</MudCarouselItem>
-
-	<MudCarouselItem Style="@($"color:{Colors.Shades.Black}; background:{Colors.Red.Darken1};")">
-		<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[4]" Title="Amnesiac" Style="@($"color:{Colors.Shades.White}; background:{Colors.Shades.Black};")" OnClickSong="OnClickSong"></AlbumView>
-	</MudCarouselItem>
-
-	<MudCarouselItem Style="@($"color:{Colors.Shades.Black}; background:{Colors.Blue.Lighten2};")">
-		<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[5]" Title="Hail to the Thief" Style="@($"color:{Colors.Green.Darken4}; background:{Colors.Red.Lighten2};")" OnClickSong="OnClickSong"></AlbumView>
-	</MudCarouselItem>
-
-	<MudCarouselItem Style="@($"color:{Colors.Yellow.Lighten2}; background:{Colors.Shades.Black};")">
-		<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[6]" Title="In Rainbows" Style="@($"color:{Colors.Blue.Darken3}; background:{Colors.Orange.Lighten2};")" OnClickSong="OnClickSong"></AlbumView>
-	</MudCarouselItem>
-
-</MudCarousel>
+</MudStack>
 
 
 
@@ -54,6 +84,7 @@
 	public EventCallback<string> OnClickSong { get; set; }
 
 	private List<List<SongData>> _songsByAlbum;
+	private int _currentAlbumIndex;
 
 	protected override void OnParametersSet()
 	{

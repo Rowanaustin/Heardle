@@ -72,7 +72,10 @@
 					@if (!_guessInputFocused || _breakpoint.CompareTo(Breakpoint.Sm) >= 1)
 					{
 						<MudProgressLinear Color="Color.Primary" Value="@Value" Class="my-7" Size="Size.Large" />
-						<MudSwitch @bind-Checked="@PlaySwitch" Label="Play" Color="Color.Success" />
+						<MudStack Row="true" Justify="Justify.SpaceBetween">
+							<MudSwitch @bind-Checked="@PlaySwitch" Label="Play" Color="Color.Success" />
+							<MudButton @onclick="@HandleOnSkip" Disabled="@GameCompleted">@Skip</MudButton>
+						</MudStack>
 					}
 					</MudCardContent>
 			</MudCard>
@@ -84,10 +87,10 @@
 		
 			<MudCard hidden="@GameCompleted">
 				<MudCardContent>
-					<MudStack Row=true Spacing="4">
-						<MudButton @onclick="@HandleOnSkip" Disabled="@GameCompleted">@Skip</MudButton>
+					@*<MudStack Row=true Spacing="4">*@
+						
 						@*<MudButton @onclick="@HandleOnGuess" Disabled="@GameCompleted">Guess</MudButton>*@
-					</MudStack>
+					@*</MudStack>*@
 @*					<MudAutocomplete T="string" @bind-Value="@GuessText" Disabled="@GameCompleted" SearchFunc="@AutoComplete" MaxItems=5 @onfocus="HandleOnGuessFocus" OnBlur="HandleOnGuessBlur">
 							<MoreItemsTemplate>
 								<MudText Align="Align.Center" Class="px-4 py-1">
