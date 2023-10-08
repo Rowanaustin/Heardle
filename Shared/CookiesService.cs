@@ -19,6 +19,7 @@ namespace RadioHeardleServer.Shared
 		private string _userTag;
 		private bool _dayScorePushed;
 		private string _dayScorePushedWithTag;
+		private string[] _songsGuessed;
 
 		public int Version { get => _version; }
 		public string Guesses { get => _guesses; }
@@ -29,6 +30,7 @@ namespace RadioHeardleServer.Shared
 		public bool DarkSetting { get => _darkSetting; set => _darkSetting = value; }
 		public string UserTag { get => _userTag; }
 		public bool DayScorePushed { get => _dayScorePushed; set => _dayScorePushed = value; }
+		public string[] SongsGuessed => _songsGuessed;
 
 		public string DayScorePushedWithTag { get => _dayScorePushedWithTag; set => _dayScorePushedWithTag = value; }
 
@@ -37,7 +39,7 @@ namespace RadioHeardleServer.Shared
 			_protectedStore = localStore;
 		}
 
-		public void UpdateStorage(int version, string guesses, bool complete, int[] results, int lastVersionWon, int streak, string userTag, bool dayScorePushed)
+		public void UpdateStorage(int version, string guesses, bool complete, int[] results, int lastVersionWon, int streak, string userTag, bool dayScorePushed, List<string> songsGuessed)
 		{
 			_version = version;
 			_guesses = guesses;
@@ -47,6 +49,7 @@ namespace RadioHeardleServer.Shared
 			_streak = streak;
 			_userTag = userTag;
 			_dayScorePushed = dayScorePushed;
+			_songsGuessed = songsGuessed.ToArray();
 		}
 
 		public async Task LoadStorage()
@@ -264,6 +267,25 @@ namespace RadioHeardleServer.Shared
 				}
 				_dayScorePushedWithTag = "";
 			}
+
+			try
+			{
+				var songsGuessed = await _protectedStore.GetAsync<string[]>("songsGuessed");
+				_songsGuessed = songsGuessed.Success && songsGuessed.Value != null ? songsGuessed.Value : new string[0];
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine("_protectedStore error: " + e.Message);
+				try
+				{
+					await _protectedStore.DeleteAsync("songsGuessed");
+				}
+				catch (Exception iex)
+				{
+					Console.WriteLine("Browser storage Delete error: " + iex.Message);
+				}
+				_songsGuessed = new string[0];
+			}
 		}
 
 		public async Task CommitStorage()
@@ -278,6 +300,7 @@ namespace RadioHeardleServer.Shared
 			await _protectedStore.SetAsync("userTag", _userTag);
 			await _protectedStore.SetAsync("dayScorePushed", _dayScorePushed);
 			await _protectedStore.SetAsync("dayScorePushedWithTag", _dayScorePushedWithTag);
+			await _protectedStore.SetAsync("songsGuessed", _songsGuessed);
 		}
 	}
 }

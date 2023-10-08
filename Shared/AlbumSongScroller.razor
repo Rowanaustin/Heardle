@@ -1,34 +1,41 @@
 ﻿@using MudBlazor
 @using RadioHeardleServer.Data;
 
-<MudCarousel Class="mud-width-full" Style="height:275px;" ShowArrows="false" ShowBullets="true" EnableSwipeGesture="true" AutoCycle="false" TData="object">
+<MudCarousel Style="height:20pc;"
+	ShowArrows="true" 
+	ShowBullets="false" 
+	EnableSwipeGesture="true" 
+	AutoCycle="false" 
+	PreviousIcon="@Icons.Material.Filled.SkipPrevious"
+	NextIcon="@Icons.Material.Filled.SkipNext" 
+	TData="object">
 
 	<MudCarouselItem Style="@($"color:{Colors.Yellow.Darken2}; background:{Colors.Shades.White};")">
-		<AlbumView Songs="@_songsByAlbum[0]" Title="Pablo Honey" Style="@($"color:{Colors.Shades.Black}; background:{Colors.Yellow.Darken2};")"></AlbumView>
+		<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[0]" Title="Pablo Honey" Style="@($"color:{Colors.Shades.Black}; background:{Colors.Yellow.Darken2};")" OnClickSong="OnClickSong"></AlbumView>
 	</MudCarouselItem>
 
-	<MudCarouselItem Style="@($"color:{Colors.Pink.Lighten3}; background:{Colors.Grey.Default};")">
-		<AlbumView Songs="@_songsByAlbum[1]" Title="The Bends" Style="@($"color:{Colors.Shades.White}; background:{Colors.Pink.Lighten4};")"></AlbumView>
+	<MudCarouselItem Style="@($"color:{Colors.Shades.White}; background:{Colors.Grey.Darken4};")">
+		<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[1]" Title="The Bends" Style="@($"color:{Colors.Shades.Black}; background:{Colors.Brown.Lighten2};")" OnClickSong="OnClickSong"></AlbumView>
 	</MudCarouselItem>
 
 	<MudCarouselItem Style="@($"color:{Colors.Blue.Darken2}; background:{Colors.Shades.White};")">
-		<AlbumView Songs="@_songsByAlbum[2]" Title="Ok Computer" Style="@($"color:{Colors.Blue.Darken2}; background:{Colors.BlueGrey.Lighten3};")"></AlbumView>
+		<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[2]" Title="Ok Computer" Style="@($"color:{Colors.Blue.Darken2}; background:{Colors.BlueGrey.Lighten3};")" OnClickSong="OnClickSong"></AlbumView>
 	</MudCarouselItem>
 
 	<MudCarouselItem Style="@($"color:{Colors.Shades.White}; background:{Colors.BlueGrey.Darken4};")">
-		<AlbumView Songs="@_songsByAlbum[3]" Title="Kid A" Style="@($"color:{Colors.Blue.Default}; background:{Colors.Shades.White};")"></AlbumView>
+		<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[3]" Title="Kid A" Style="@($"color:{Colors.Blue.Default}; background:{Colors.Shades.White};")" OnClickSong="OnClickSong"></AlbumView>
 	</MudCarouselItem>
 
 	<MudCarouselItem Style="@($"color:{Colors.Shades.Black}; background:{Colors.Red.Darken1};")">
-		<AlbumView Songs="@_songsByAlbum[4]" Title="Amnesiac" Style="@($"color:{Colors.Shades.White}; background:{Colors.Shades.Black};")"></AlbumView>
+		<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[4]" Title="Amnesiac" Style="@($"color:{Colors.Shades.White}; background:{Colors.Shades.Black};")" OnClickSong="OnClickSong"></AlbumView>
 	</MudCarouselItem>
 
-	<MudCarouselItem Style="@($"color:{Colors.Red.Darken2}; background:{Colors.LightBlue.Lighten1};")">
-		<AlbumView Songs="@_songsByAlbum[5]" Title="Hail to the Thief" Style="@($"color:{Colors.Orange.Default}; background:{Colors.Green.Lighten2};")"></AlbumView>
+	<MudCarouselItem Style="@($"color:{Colors.Shades.Black}; background:{Colors.Blue.Lighten2};")">
+		<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[5]" Title="Hail to the Thief" Style="@($"color:{Colors.Green.Darken4}; background:{Colors.Red.Lighten2};")" OnClickSong="OnClickSong"></AlbumView>
 	</MudCarouselItem>
 
-	<MudCarouselItem Style="@($"color:{Colors.Purple.Lighten2}; background:{Colors.Shades.Black};")">
-		<AlbumView Songs="@_songsByAlbum[6]" Title="In Rainbows" Style="@($"color:{Colors.Blue.Darken2}; background:{Colors.Orange.Default};")"></AlbumView>
+	<MudCarouselItem Style="@($"color:{Colors.Yellow.Lighten2}; background:{Colors.Shades.Black};")">
+		<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[6]" Title="In Rainbows" Style="@($"color:{Colors.Blue.Darken3}; background:{Colors.Orange.Lighten2};")" OnClickSong="OnClickSong"></AlbumView>
 	</MudCarouselItem>
 
 </MudCarousel>
@@ -39,6 +46,12 @@
 
 	[Parameter]
 	public SongData[] Songs { get; set; }
+
+	[Parameter]
+	public List<string> GuessedSongs { get; set; }
+
+	[Parameter]
+	public EventCallback<string> OnClickSong { get; set; }
 
 	private List<List<SongData>> _songsByAlbum;
 

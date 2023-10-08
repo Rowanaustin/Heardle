@@ -3,14 +3,14 @@
 
 
 <MudContainer>
-	<MudStack>
+	<MudStack Justify="Justify.SpaceEvenly">
 
 		<MudText Align="Align.Center">@Title</MudText>
 
 		<MudGrid Justify="Justify.Center">
 			@foreach(var song in Songs)
 			{
-				<MudChip Style="@Style" Text="@song._songName"></MudChip>
+				<MudChip OnClick="() => OnClickChip(song._songName)" Disabled="@(GuessedSongs.Contains(song._songName))" Style="@Style" Text="@song._songName"></MudChip>
 			}
 		</MudGrid>
 
@@ -25,5 +25,16 @@
 	public List<SongData> Songs { get; set; }
 
 	[Parameter]
+	public List<string> GuessedSongs { get; set; }
+
+	[Parameter]
 	public string Style { get; set; }
+
+	[Parameter]
+	public EventCallback<string> OnClickSong { get; set; }
+
+	private void OnClickChip(string song)
+	{
+		OnClickSong.InvokeAsync(song);
+	}
 }

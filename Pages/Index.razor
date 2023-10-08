@@ -86,7 +86,7 @@
 				<MudCardContent>
 					<MudStack Row=true Spacing="4">
 						<MudButton @onclick="@HandleOnSkip" Disabled="@GameCompleted">@Skip</MudButton>
-						<MudButton @onclick="@HandleOnGuess" Disabled="@GameCompleted">Guess</MudButton>
+						@*<MudButton @onclick="@HandleOnGuess" Disabled="@GameCompleted">Guess</MudButton>*@
 					</MudStack>
 @*					<MudAutocomplete T="string" @bind-Value="@GuessText" Disabled="@GameCompleted" SearchFunc="@AutoComplete" MaxItems=5 @onfocus="HandleOnGuessFocus" OnBlur="HandleOnGuessBlur">
 							<MoreItemsTemplate>
@@ -96,7 +96,7 @@
 							</MoreItemsTemplate>
 						</MudAutocomplete>*@
 
-						<AlbumSongScroller Songs="FileOperationsService.SongList"></AlbumSongScroller>
+					<AlbumSongScroller GuessedSongs="_guessedSongs" OnClickSong="HandleOnChipGuess" Songs="FileOperationsService.SongList"></AlbumSongScroller>
 
 				</MudCardContent>
 			</MudCard>
@@ -202,6 +202,7 @@
 	private string[] _skipIcons = new string[_numGuesses];
 
 	private string _guesses = "";
+	private List<string> _guessedSongs = new();
 
 	private bool _guessInputFocused = false;
 
@@ -284,6 +285,8 @@
 
 		_currentResults = CookiesService.Results;
 
+		_guessedSongs = CookiesService.SongsGuessed.ToList();
+
 		if (CookiesService.LastVersionWon +1  < _editionVersion )
 		{
 			Statistics.StreakCount = 0;
@@ -326,7 +329,7 @@
 
 	private void UpdateCookies()
 	{
-		CookiesService.UpdateStorage(_editionVersion, _guesses, GameCompleted, _currentResults, _lastVersionWon, Statistics.StreakCount, _userTag, _dayScorePushed);
+		CookiesService.UpdateStorage(_editionVersion, _guesses, GameCompleted, _currentResults, _lastVersionWon, Statistics.StreakCount, _userTag, _dayScorePushed, _guessedSongs);
 	}
 
 	//private async Task<IEnumerable<string>> AutoComplete(string search)
@@ -435,6 +438,12 @@
 		HandleSkipPosition();
 	}
 
+	private void HandleOnChipGuess(string song)
+	{
+		GuessText = song;
+		HandleOnGuess();
+	}
+
 	private async void HandleOnGuess()
 	{
 		var song = _songName.Trim();
@@ -453,6 +462,9 @@
 		{
 			_guesses += 'g';
 			BufferValue += _bufferPart * _sectionDurations[_guesses.Length];
+
+			_guessedSongs.Add(GuessText.Trim());
+
 			if (_guesses.Length >= (_numGuesses))
 				CookiesService.Results[0] += 1;
 			HandleSkipPosition();
