@@ -289,8 +289,6 @@
 
 		_currentResults = CookiesService.Results;
 
-		_guessedSongs = CookiesService.SongsGuessed.ToList();
-
 		if (CookiesService.LastVersionWon +1  < _editionVersion )
 		{
 			Statistics.StreakCount = 0;
@@ -305,6 +303,7 @@
 		if (CookiesService.Version == _editionVersion)
 		{
 			_guesses = CookiesService.Guesses;
+			_guessedSongs = CookiesService.SongsGuessed.ToList();
 
 			_dayScorePushed = CookiesService.DayScorePushed;
 
