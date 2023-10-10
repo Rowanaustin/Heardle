@@ -50,9 +50,7 @@
 						
 						@if (HasTopScoreWithoutName)
 						{
-							<MudStack Row="true" Justify="Justify.Center" AlignItems="AlignItems.Center">
-								<MudText Typo="Typo.caption" Color="Color.Success"><i>Add your name in 'About'</i></MudText>
-							</MudStack>
+							<MudChip OnClick="OnGoToNameSet" DisableRipple="true" Variant="Variant.Text" Color="Color.Secondary"><i>&lt;your-name&gt;</i></MudChip>
 						}
 
 					</MudChipSet>
@@ -83,6 +81,9 @@
 
 	[Parameter]
 	public EventCallback OnClose { get; set; }
+
+	[Parameter]
+	public EventCallback OnGoToNameSet { get; set; }
 
 	[Parameter]
 	public List<ChartSeries> Series { get; set; }

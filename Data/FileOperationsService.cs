@@ -62,6 +62,9 @@ namespace RadioHeardleServer.Data
 
 		public void PushBestScoreData(BestUserData bestUserData)
 		{
+			if (bestUserData.Score > 5)
+				return;
+
 			var currentBest = GetBestUserScore();
 
 			if (bestUserData.Score == currentBest)

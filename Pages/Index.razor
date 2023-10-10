@@ -109,7 +109,8 @@
 		<MudOverlay Style="opacity:0.99" @bind-Visible="_statsVisible" DarkBackground="true">
 		
 			<StatsView GameComplete="GameCompleted" OnClose="OnCloseOverlay" ResultText="@ResultText" Series="Series" Statistics="Statistics" XAxisLabels="XAxisLabels" 
-				BestScoreToday="BestUserData" HasTopScoreWithoutName="@(GameCompleted && _guesses.Length == BestUserData.Score && CookiesService.DayScorePushedWithTag.Length < 1)"/>
+				BestScoreToday="BestUserData" OnGoToNameSet="OnOpenHelp"
+				HasTopScoreWithoutName="@((CookiesService.DayScorePushedWithTag.Length < 1) && GameCompleted && (_guesses.Last() == 'w') && (_guesses.Length == BestUserData.Score))"/>
 
 		</MudOverlay>
 
@@ -410,6 +411,7 @@
 
 	private void OnOpenHelp()
 	{
+		_statsVisible = false;
 		_helpVisible = true;
 
 		StateHasChanged();
@@ -417,6 +419,7 @@
 
 	private void OnOpenStats()
 	{
+		_helpVisible = false;
 		_statsVisible = true;
 
 		StateHasChanged();
