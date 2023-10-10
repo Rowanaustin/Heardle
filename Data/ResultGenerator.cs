@@ -12,12 +12,13 @@ namespace RadioHeardleServer.Data
 		{
 			StringBuilder unicodeBuilder = new StringBuilder("Radioheardle: " + edition + ": ");
 
-			if (guessedOrSkipped.Length > guessesAllowed)
-				unicodeBuilder.Append('X');
-			else
+			if (guessedOrSkipped.Last() == 'w')
 				unicodeBuilder.Append(guessedOrSkipped.Length);
+			else
+				unicodeBuilder.Append('X');
 
 			unicodeBuilder.Append("/");
+
 			unicodeBuilder.Append(guessesAllowed);
 
 			unicodeBuilder.Append("\n");
