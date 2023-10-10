@@ -563,7 +563,8 @@
 
 	private void UpdateDaySubmission()
 	{
-		var thisUserData = new BestUserData(_guesses.Length, new List<string>() { CookiesService.UserTag });
+		var score = _guesses.Last() == 'w' ? _guesses.Length : 6;
+		var thisUserData = new BestUserData(score, new List<string>() { CookiesService.UserTag });
 		FileOperationsService.PushBestScoreData(thisUserData);
 		_dayScorePushed = true;
 		CookiesService.DayScorePushedWithTag = _userTag;
