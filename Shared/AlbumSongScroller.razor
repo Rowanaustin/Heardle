@@ -1,25 +1,24 @@
 ﻿@using MudBlazor
 @using RadioHeardleServer.Data;
 
-<MudStack>
+<MudStack Spacing="0">
 	<MudStack Row="true" Justify="Justify.Center">
-		<MudRadioGroup T="int" @bind-SelectedOption="@_currentAlbumIndex">
-
-			<MudRadio T="int" Option="0" Style="@($"color:{Colors.Yellow.Darken2};")" Size="Size.Small"></MudRadio>
-			<MudRadio T="int" Option="1" Style="@($"color:{Colors.Brown.Lighten2};")" Size="Size.Small"></MudRadio>
-			<MudRadio T="int" Option="2" Style="@($"color:{Colors.BlueGrey.Lighten3};")" Size="Size.Small"></MudRadio>
-			<MudRadio T="int" Option="3" Style="@($"color:{Colors.BlueGrey.Darken4};")" Size="Size.Small"></MudRadio>
-			<MudRadio T="int" Option="4" Style="@($"color:{Colors.Red.Darken1};")" Size="Size.Small"></MudRadio>
-			<MudRadio T="int" Option="5" Style="@($"color:{Colors.Blue.Lighten2};")" Size="Size.Small"></MudRadio>
-			<MudRadio T="int" Option="6" Style="@($"color:{Colors.Orange.Lighten2};")" Size="Size.Small"></MudRadio>
-
-		</MudRadioGroup>
+			<div class="d-flex flex-grow-1">
+				<AlbumButton AlbumIndex="0" Clicked="OnClickAlbum" Width="5"></AlbumButton>
+				<AlbumButton AlbumIndex="1" Clicked="OnClickAlbum" Width="5"></AlbumButton>
+				<AlbumButton AlbumIndex="2" Clicked="OnClickAlbum" Width="5"></AlbumButton>
+				<AlbumButton AlbumIndex="3" Clicked="OnClickAlbum" Width="5"></AlbumButton>
+				<AlbumButton AlbumIndex="4" Clicked="OnClickAlbum" Width="5"></AlbumButton>
+				<AlbumButton AlbumIndex="5" Clicked="OnClickAlbum" Width="5"></AlbumButton>
+				<AlbumButton AlbumIndex="6" Clicked="OnClickAlbum" Width="5"></AlbumButton>
+			</div>
 	</MudStack>
+
 	@switch(_currentAlbumIndex)
 	{
 		case 0:
 		{
-			<MudPaper Style="@($"color:{Colors.Yellow.Darken2}; background:{Colors.Shades.White};")">
+			<MudPaper Style="@($"color:{Colors.Yellow.Darken2}; background:{Colors.Grey.Lighten1};")">
 					<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[0]" Title="Pablo Honey" Style="@($"color:{Colors.Shades.Black}; background:{Colors.Yellow.Darken2}; ")" OnClickSong="OnClickSong"></AlbumView>
 			</MudPaper>
 			break;
@@ -105,5 +104,11 @@
 
 		for (int i = 0; i < 7; i++)
 			_songsByAlbum.Add(new List<SongData>());
+	}
+
+	private void OnClickAlbum(int album)
+	{
+		_currentAlbumIndex = album;
+		StateHasChanged();
 	}
 }

@@ -1,0 +1,95 @@
+﻿@using MudBlazor
+
+@switch(AlbumIndex)
+{
+	case 0:
+	{
+			<MudButton Class="flex-1 d-flex py-8 rounded-0" Style="@($"background:{Colors.Grey.Lighten1}")" @onclick="@OnClicked">
+				<MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+					<MudText  Typo="Typo.button"  Align="Align.Center"  Style="@($"color:{Colors.Yellow.Darken2}")">PH</MudText>
+				</MudStack>
+			</MudButton>
+			break;
+	}
+	case 1:
+	{
+			<MudButton Class="flex-1 d-flex py-8 rounded-0" Style="@($"background:{Colors.Grey.Darken4}")" @onclick="@OnClicked">
+				<MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+					<MudText Typo="Typo.button"  Align="Align.Center" Style="@($"color:{Colors.Brown.Lighten2}")">TB</MudText>
+				</MudStack>
+			</MudButton>
+			break;
+	}
+	case 2:
+	{
+			<MudButton Class="flex-1 d-flex py-8 rounded-0" Style="@($"background:{Colors.Shades.White}; height:{_height}")" @onclick="@OnClicked">
+				<MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+					<MudText Typo="Typo.button" Align="Align.Center" Style="@($"color:{Colors.BlueGrey.Lighten3}")">OC</MudText>
+				</MudStack>
+			</MudButton>
+			break;
+	}
+	case 3:
+	{
+			<MudButton Class="flex-1 d-flex py-8 rounded-0" Style="@($"background:{Colors.BlueGrey.Darken4}")" @onclick="@OnClicked">
+@*				<MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">*@
+					<MudText Typo="Typo.button" Align="Align.Center" Style="@($"color:{Colors.Shades.White}")">KA</MudText>
+				@*</MudStack>*@
+			</MudButton>
+		break;
+	}
+	case 4:
+	{
+			<MudButton Class="flex-1 d-flex py-8 rounded-0" Style="@($"background:{Colors.Red.Darken1}")" @onclick="@OnClicked">
+				<MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+					<MudText Typo="Typo.button" Align="Align.Center" Style="@($"color:{Colors.Shades.Black}")">A</MudText>
+				</MudStack>
+			</MudButton>
+		break;
+	}
+	case 5:
+	{
+			<MudButton Class="flex-1 d-flex py-8 rounded-0" Style="@($"background:{Colors.Blue.Lighten2}")" @onclick="@OnClicked">
+				<MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+					<MudText Typo="Typo.button" Align="Align.Center" Style="@($"color:{Colors.Red.Lighten2}")">HTTT</MudText>
+				</MudStack>
+			</MudButton>
+			break;
+	}
+
+	default:
+	{
+			<MudButton Class="flex-1 d-flex py-8 rounded-0" Style="@($"background:{Colors.Shades.Black}")" @onclick="@OnClicked">
+				<MudStack Row="true" Justify="Justify.Center" AlignItems="AlignItems.Center">
+					<MudText Typo="Typo.caption" Align="Align.Center" Style="@($"color:{Colors.Orange.Lighten2}")">IR</MudText>
+				</MudStack>
+			</MudButton>
+			break;
+	}
+}
+
+
+@code {
+	[Parameter]
+	public int AlbumIndex { get; set; }
+
+	[Parameter]
+	public EventCallback<int> Clicked { get; set; }
+
+	[Parameter]
+	public int Width { get; set; }
+
+	private string _width;
+	private string _height;
+
+	protected void OnParametersSet()
+	{
+		_width = Width.ToString() + "pc";
+		_height = "30px";
+	}
+
+	private void OnClicked()
+	{
+		Clicked.InvokeAsync(AlbumIndex);
+	}
+}
