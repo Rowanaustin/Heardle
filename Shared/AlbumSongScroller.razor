@@ -2,68 +2,108 @@
 @using RadioHeardleServer.Data;
 
 <MudStack Spacing="0">
-	<MudStack Row="true" Justify="Justify.Center">
-			<div class="d-flex flex-grow-1">
-				<AlbumButton AlbumIndex="0" Clicked="OnClickAlbum" Width="5"></AlbumButton>
-				<AlbumButton AlbumIndex="1" Clicked="OnClickAlbum" Width="5"></AlbumButton>
-				<AlbumButton AlbumIndex="2" Clicked="OnClickAlbum" Width="5"></AlbumButton>
-				<AlbumButton AlbumIndex="3" Clicked="OnClickAlbum" Width="5"></AlbumButton>
-				<AlbumButton AlbumIndex="4" Clicked="OnClickAlbum" Width="5"></AlbumButton>
-				<AlbumButton AlbumIndex="5" Clicked="OnClickAlbum" Width="5"></AlbumButton>
-				<AlbumButton AlbumIndex="6" Clicked="OnClickAlbum" Width="5"></AlbumButton>
-			</div>
-	</MudStack>
 
-	@switch(_currentAlbumIndex)
+	@if (_currentAlbumIndex < 0)
 	{
-		case 0:
+
+		<MudGrid Justify="Justify.SpaceAround" Spacing="2">
+			<MudItem xs="4">
+				<AlbumButton AlbumIndex="0" Clicked="OnClickAlbum"></AlbumButton>
+			</MudItem>
+			<MudItem xs="4">
+				<AlbumButton AlbumIndex="1" Clicked="OnClickAlbum"></AlbumButton>
+			</MudItem>
+			<MudItem xs="4">
+				<AlbumButton AlbumIndex="2" Clicked="OnClickAlbum"></AlbumButton>
+			</MudItem>
+			<MudItem xs="4">
+				<AlbumButton AlbumIndex="3" Clicked="OnClickAlbum"></AlbumButton>
+			</MudItem>
+			<MudItem xs="4">
+				<AlbumButton AlbumIndex="4" Clicked="OnClickAlbum"></AlbumButton>
+			</MudItem>
+			<MudItem xs="4">
+				<AlbumButton AlbumIndex="5" Clicked="OnClickAlbum"></AlbumButton>
+			</MudItem>
+			<MudItem xs="4">
+				<AlbumButton AlbumIndex="6" Clicked="OnClickAlbum"></AlbumButton>
+			</MudItem>
+			<MudItem xs="4">
+				<AlbumButton AlbumIndex="7" Clicked="OnClickAlbum"></AlbumButton>
+			</MudItem>
+			<MudItem xs="4">
+				<AlbumButton AlbumIndex="8" Clicked="OnClickAlbum"></AlbumButton>
+			</MudItem>
+		</MudGrid>
+
+	}
+	else
+	{	
+		@switch(_currentAlbumIndex)
 		{
-			<MudPaper Style="@($"color:{Colors.Yellow.Darken2}; background:{Colors.Grey.Lighten1};")">
-					<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[0]" Title="Pablo Honey" Style="@($"color:{Colors.Shades.Black}; background:{Colors.Yellow.Darken2}; ")" OnClickSong="OnClickSong"></AlbumView>
-			</MudPaper>
-			break;
-		}
-		case 1:
-		{
-				<MudPaper Style="@($"color:{Colors.Shades.White}; background:{Colors.Grey.Darken4};")">
-				<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[1]" Title="The Bends" Style="@($"color:{Colors.Shades.Black}; background:{Colors.Brown.Lighten2}; ")" OnClickSong="OnClickSong"></AlbumView>
-			</MudPaper>
-			break;
-		}
-		case 2:
-		{
-				<MudPaper Style="@($"color:{Colors.Blue.Darken2}; background:{Colors.Shades.White};")">
-				<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[2]" Title="Ok Computer" Style="@($"color:{Colors.Blue.Darken2}; background:{Colors.BlueGrey.Lighten3}; ")" OnClickSong="OnClickSong"></AlbumView>
-			</MudPaper>
-			break;
-		}
-		case 3:
-		{
-				<MudPaper Style="@($"color:{Colors.Shades.White}; background:{Colors.BlueGrey.Darken4};")">
-					<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[3]" Title="Kid A" Style="@($"color:{Colors.Blue.Default}; background:{Colors.Shades.White}; ")" OnClickSong="OnClickSong"></AlbumView>
-			</MudPaper>
-			break;
-		}
-		case 4:
-		{
-				<MudPaper Style="@($"color:{Colors.Shades.Black}; background:{Colors.Red.Darken1};")">
-				<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[4]" Title="Amnesiac" Style="@($"color:{Colors.Shades.White}; background:{Colors.Shades.Black}; ")" OnClickSong="OnClickSong"></AlbumView>
-			</MudPaper>
-			break;
-		}
-		case 5:
-		{
-			<MudPaper Style="@($"color:{Colors.Shades.Black}; background:{Colors.Blue.Lighten2};")">
-					<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[5]" Title="Hail to the Thief" Style="@($"color:{Colors.Green.Darken4}; background:{Colors.Red.Lighten2}; ")" OnClickSong="OnClickSong"></AlbumView>
-			</MudPaper>
-			break;
-		}
-		default:
-		{
-			<MudPaper Style="@($"color:{Colors.Yellow.Lighten2}; background:{Colors.Shades.Black};")">
-					<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[6]" Title="In Rainbows" Style="@($"color:{Colors.Blue.Darken3}; background:{Colors.Orange.Lighten2}; ")" OnClickSong="OnClickSong"></AlbumView>
-			</MudPaper>
-			break;
+			case 1:
+			{
+					<MudPaper Style="@($"color:{Colors.Shades.White}; background:{Colors.Grey.Darken4};")">
+					<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[1]" Title="The Bends" Style="@($"color:{Colors.Shades.Black}; background:{Colors.Brown.Lighten2}; ")" OnClickSong="OnClickSong" OnBack="OnClickBack"></AlbumView>
+				</MudPaper>
+				break;
+			}
+			case 2:
+			{
+					<MudPaper Style="@($"color:{Colors.Blue.Darken2}; background:{Colors.Shades.White};")">
+					<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[2]" Title="Ok Computer" Style="@($"color:{Colors.Blue.Darken2}; background:{Colors.BlueGrey.Lighten3}; ")" OnClickSong="OnClickSong" OnBack="OnClickBack"></AlbumView>
+				</MudPaper>
+				break;
+			}
+			case 3:
+			{
+					<MudPaper Style="@($"color:{Colors.Shades.White}; background:{Colors.BlueGrey.Darken4};")">
+						<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[3]" Title="Kid A" Style="@($"color:{Colors.Blue.Default}; background:{Colors.Shades.White}; ")" OnClickSong="OnClickSong" OnBack="OnClickBack"></AlbumView>
+				</MudPaper>
+				break;
+			}
+			case 4:
+			{
+					<MudPaper Style="@($"color:{Colors.Shades.Black}; background:{Colors.Red.Darken1};")">
+					<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[4]" Title="Amnesiac" Style="@($"color:{Colors.Shades.White}; background:{Colors.Shades.Black}; ")" OnClickSong="OnClickSong" OnBack="OnClickBack"></AlbumView>
+				</MudPaper>
+				break;
+			}
+			case 5:
+			{
+				<MudPaper Style="@($"color:{Colors.Shades.Black}; background:{Colors.Blue.Lighten2};")">
+						<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[5]" Title="Hail to the Thief" Style="@($"color:{Colors.Green.Darken4}; background:{Colors.Red.Lighten2}; ")" OnClickSong="OnClickSong" OnBack="OnClickBack"></AlbumView>
+				</MudPaper>
+				break;
+			}
+			case 6:
+			{
+				<MudPaper Style="@($"color:{Colors.Yellow.Lighten2}; background:{Colors.Shades.Black};")">
+					<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[6]" Title="In Rainbows" Style="@($"color:{Colors.Blue.Darken3}; background:{Colors.Orange.Lighten2}; ")" OnClickSong="OnClickSong" OnBack="OnClickBack"></AlbumView>
+				</MudPaper>
+				break;
+			}
+			case 7:
+			{
+				<MudPaper Style="@($"color:{Colors.Green.Darken2}; background:{Colors.Grey.Darken4};")">
+					<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[7]" Title="The King of Limbs" Style="@($"color:{Colors.Yellow.Darken1}; background:{Colors.Red.Darken1}; ")" OnClickSong="OnClickSong" OnBack="OnClickBack"></AlbumView>
+				</MudPaper>
+				break;
+			}
+			case 8:
+			{
+					<MudPaper Style="@($"color:{Colors.Grey.Darken3}; background:{Colors.Grey.Lighten4};")">
+						<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[8]" Title="A Moon Shaped Pool" Style="@($"color:{Colors.Grey.Darken1}; background:{Colors.Shades.Black}; ")" OnClickSong="OnClickSong" OnBack="OnClickBack"></AlbumView>
+				</MudPaper>
+				break;
+			}
+			default:
+			{
+				<MudPaper Style="@($"color:{Colors.Yellow.Darken2}; background:{Colors.Grey.Lighten1};")">
+					<AlbumView GuessedSongs="GuessedSongs" Songs="@_songsByAlbum[0]" Title="Pablo Honey" Style="@($"color:{Colors.Shades.Black}; background:{Colors.Yellow.Darken2}; ")" OnClickSong="OnClickSong" OnBack="OnClickBack"></AlbumView>
+				</MudPaper>
+				break;
+			}
 		}
 	}
 
@@ -83,7 +123,7 @@
 	public EventCallback<string> OnClickSong { get; set; }
 
 	private List<List<SongData>> _songsByAlbum;
-	private int _currentAlbumIndex;
+	private int _currentAlbumIndex = -1;
 
 	protected override void OnParametersSet()
 	{
@@ -102,13 +142,19 @@
 	{
 		_songsByAlbum = new();
 
-		for (int i = 0; i < 7; i++)
+		for (int i = 0; i < Songs.Length; i++)
 			_songsByAlbum.Add(new List<SongData>());
 	}
 
 	private void OnClickAlbum(int album)
 	{
 		_currentAlbumIndex = album;
+		StateHasChanged();
+	}
+
+	private void OnClickBack()
+	{
+		_currentAlbumIndex = -1;
 		StateHasChanged();
 	}
 }

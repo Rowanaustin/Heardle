@@ -15,7 +15,7 @@
 
 <PageTitle>Radioheardle</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Small">
+<MudContainer MaxWidth="MaxWidth.ExtraSmall">
 	@if (loading)
 	{
 		<MudContainer MaxWidth="MaxWidth.Small">
@@ -57,26 +57,22 @@
 			<MudCard >
 				<MudCardContent>
 
-					@if (!_guessInputFocused || _breakpoint.CompareTo(Breakpoint.Sm) >= 1)
-					{
-							<MudStack Row="true" Justify="Justify.SpaceBetween">
-								<MudText Align="Align.Left"><h1>Radioheardle</h1></MudText>
-								<MudText Align="Align.Right"><h1>@_editionVersion.ToString()</h1></MudText>
-							</MudStack>
+					<MudStack Row="true" Justify="Justify.SpaceBetween">
+						<MudText Align="Align.Left"><h1>Radioheardle</h1></MudText>
+						<MudText Align="Align.Right"><h1>@_editionVersion.ToString()</h1></MudText>
+					</MudStack>
 
-						<MudText Typo="Typo.body2" Align="Align.Right">@_editionDate</MudText>
-					}
+					<MudText Typo="Typo.body2" Align="Align.Right">@_editionDate</MudText>
+					 
+					<MudProgressLinear Color="@BarColour" Value="@BufferValue" Size="Size.Medium" />
 
-					<MudProgressLinear Color="@BarColour" Value="@BufferValue" Class="my-7" Size="Size.Medium" />
+					<MudProgressLinear Color="Color.Primary" Value="@Value" Size="Size.Medium" />
 
-					@if (!_guessInputFocused || _breakpoint.CompareTo(Breakpoint.Sm) >= 1)
-					{
-						<MudProgressLinear Color="Color.Primary" Value="@Value" Class="my-7" Size="Size.Large" />
-						<MudStack Row="true" Justify="Justify.SpaceBetween">
-							<MudSwitch @bind-Checked="@PlaySwitch" Label="Play" Color="Color.Success" />
-							<MudButton @onclick="@HandleOnSkip" Disabled="@GameCompleted">@Skip</MudButton>
-						</MudStack>
-					}
+					<MudStack Row="true" Justify="Justify.SpaceBetween">
+						<MudSwitch @bind-Checked="@PlaySwitch" Label="Play" Color="Color.Success" />
+						<MudButton @onclick="@HandleOnSkip" Disabled="@GameCompleted">@Skip</MudButton>
+					</MudStack>
+					
 					</MudCardContent>
 			</MudCard>
 
@@ -87,20 +83,9 @@
 		
 			<MudCard hidden="@GameCompleted">
 				<MudCardContent>
-					@*<MudStack Row=true Spacing="4">*@
-						
-						@*<MudButton @onclick="@HandleOnGuess" Disabled="@GameCompleted">Guess</MudButton>*@
-					@*</MudStack>*@
-@*					<MudAutocomplete T="string" @bind-Value="@GuessText" Disabled="@GameCompleted" SearchFunc="@AutoComplete" MaxItems=5 @onfocus="HandleOnGuessFocus" OnBlur="HandleOnGuessBlur">
-							<MoreItemsTemplate>
-								<MudText Align="Align.Center" Class="px-4 py-1">
-									...
-								</MudText>
-							</MoreItemsTemplate>
-						</MudAutocomplete>*@
-
+					<MudStack Justify="Justify.Center">
 					<AlbumSongScroller GuessedSongs="_guessedSongs" OnClickSong="HandleOnChipGuess" Songs="FileOperationsService.SongList"></AlbumSongScroller>
-
+					</MudStack>
 				</MudCardContent>
 			</MudCard>
 
@@ -129,7 +114,7 @@
 						</MudStack>
 							<MudText Typo="Typo.body2">Guess the Radiohead song - you get 5 attempts.</MudText>
 							<MudText Typo="Typo.body2">Guessing incorrectly or skipping will unlock the next section of the preview.</MudText>
-							<MudText Typo="Typo.body2">The song is randomly chosen each day from the first 7 studio albums.</MudText>
+							<MudText Typo="Typo.body2">The answers are all from the 9 studio albums.</MudText>
 					</MudCardContent>
 				</MudCard>
 

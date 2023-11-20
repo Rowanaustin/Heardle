@@ -3,9 +3,18 @@
 
 
 <MudContainer Style="height: 100%">
-	<MudStack Justify="Justify.SpaceEvenly">
+	<MudStack Justify="Justify.SpaceEvenly" Spacing="1">
 
-		@*<MudText Align="Align.Center">@Title</MudText>*@
+		<MudStack Row="true" Justify="Justify.SpaceBetween">
+
+			<MudStack Row="true" Justify="Justify.FlexStart">
+				<MudButton OnClick="OnClickBack" Color="Color.Tertiary" Size="Size.Small">Back</MudButton>
+			</MudStack>
+
+			<MudText Align="Align.Right" Typo="Typo.h5">@Title</MudText>	
+
+		</MudStack>
+		
 
 		<MudGrid Spacing="0" Justify="Justify.Center">
 			@foreach(var song in Songs)
@@ -15,7 +24,6 @@
 				</MudItem>
 			}
 		</MudGrid>
-
 	</MudStack>
 </MudContainer>
 
@@ -35,8 +43,16 @@
 	[Parameter]
 	public EventCallback<string> OnClickSong { get; set; }
 
+	[Parameter]
+	public EventCallback OnBack { get; set; }
+
 	private void OnClickChip(string song)
 	{
 		OnClickSong.InvokeAsync(song);
+	}
+
+	private void OnClickBack()
+	{
+		OnBack.InvokeAsync();
 	}
 }
