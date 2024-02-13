@@ -1,72 +1,9 @@
 ﻿@using MudBlazor
+@using RadioHeardleServer.Data;
 
-@switch(AlbumIndex)
-{
-	case 1:
-	{
-			<MudButton Class="rounded-0" Style="@($"width: 6pc; height: 6pc; background:{Colors.Grey.Darken4}")" @onclick="@OnClicked">
-					<MudText Typo="Typo.button"  Align="Align.Center" Style="@($"color:{Colors.Brown.Lighten2}")">The Bends</MudText>
-			</MudButton>
-			break;
-	}
-	case 2:
-	{
-			<MudButton Class="rounded-0" Style="@($"width: 6pc; height: 6pc; background:{Colors.Shades.White}")" @onclick="@OnClicked">
-					<MudText Typo="Typo.button" Align="Align.Center" Style="@($"color:{Colors.BlueGrey.Lighten3}")">OK Computer</MudText>
-			</MudButton>
-			break;
-	}
-	case 3:
-	{
-			<MudButton Class="rounded-0" Style="@($"width: 6pc; height: 6pc; background:{Colors.BlueGrey.Darken4}")" @onclick="@OnClicked">
-					<MudText Typo="Typo.button" Align="Align.Center" Style="@($"color:{Colors.Shades.White}")">Kid A</MudText>
-			</MudButton>
-		break;
-	}
-	case 4:
-	{
-			<MudButton Class="rounded-0" Style="@($"width: 6pc; height: 6pc; background:{Colors.Red.Darken1}")" @onclick="@OnClicked">
-					<MudText Typo="Typo.button" Align="Align.Center" Style="@($"color:{Colors.Shades.Black}")">Amnesiac</MudText>
-			</MudButton>
-		break;
-	}
-	case 5:
-	{
-			<MudButton Class="rounded-0" Style="@($"width: 6pc; height: 6pc; background:{Colors.Blue.Lighten2}")" @onclick="@OnClicked">
-					<MudText Typo="Typo.button" Align="Align.Center" Style="@($"color:{Colors.Red.Lighten2}")">Hail to the Thief</MudText>
-			</MudButton>
-			break;
-	}
-	case 6:
-	{
-			<MudButton Class="rounded-0" Style="@($"width: 6pc; height: 6pc; background:{Colors.Shades.Black}")" @onclick="@OnClicked">
-				<MudText Typo="Typo.button" Align="Align.Center" Style="@($"color:{Colors.Orange.Lighten2}")">In Rainbows</MudText>
-			</MudButton>
-			break;
-	}	
-	case 7:
-	{
-			<MudButton Class="rounded-0" Style="@($"width: 6pc; height: 6pc; background:{Colors.Grey.Darken4}")" @onclick="@OnClicked">
-				<MudText Typo="Typo.button" Align="Align.Center" Style="@($"color:{Colors.Orange.Lighten2}")">The King of Limbs</MudText>
-		</MudButton>
-		break;
-	}
-	case 8:
-	{
-			<MudButton Class="rounded-0" Style="@($"width: 6pc; height: 6pc; background:{Colors.Shades.Black}")" @onclick="@OnClicked">
-				<MudText Typo="Typo.button" Align="Align.Center" Style="@($"color:{Colors.Grey.Lighten3}")">A Moon Shaped Pool</MudText>
-		</MudButton>
-		break;
-	}
-	default:
-	{
-			<MudButton Class="rounded-0" Style="@($"width: 6pc; height: 6pc; background:{Colors.Grey.Lighten4}")" @onclick="@OnClicked">
-				<MudText Typo="Typo.button" Align="Align.Center" Style="@($"color:{Colors.Yellow.Darken2}")">Pablo Honey</MudText>
-			</MudButton>
-			break;
-	}
-}
-
+<MudButton Class="rounded-0" Style="@($"width: 6pc; height: 6pc; background:" + DisplayConsts.AlbumCovers[AlbumIndex].Background )" @onclick="@OnClicked">
+	<MudText Typo="Typo.button" Align="Align.Center" Style="@($"color:" + DisplayConsts.AlbumCovers[AlbumIndex].Highlight )">@DisplayConsts.AlbumNames[AlbumIndex]</MudText>
+</MudButton>
 
 @code {
 	[Parameter]
