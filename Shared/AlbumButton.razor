@@ -1,9 +1,16 @@
 ﻿@using MudBlazor
 @using RadioHeardleServer.Data;
 
+@*
 <MudButton Class="rounded-0" Style="@($"width: 6pc; height: 6pc; background:" + DisplayConsts.AlbumCovers[AlbumIndex].Background )" @onclick="@OnClicked">
 	<MudText Typo="Typo.button" Align="Align.Center" Style="@($"color:" + DisplayConsts.AlbumCovers[AlbumIndex].Highlight )">@DisplayConsts.AlbumNames[AlbumIndex]</MudText>
 </MudButton>
+*@
+
+<MudImage @onclick="@OnClicked"
+	Src="@DisplayConsts.AlbumCovers[AlbumIndex]"
+	Class="rounded-0" Style="@($"width: 6pc; height: 6pc; background:" + DisplayConsts.AlbumColours[AlbumIndex].Background )"
+	/>
 
 @code {
 	[Parameter]

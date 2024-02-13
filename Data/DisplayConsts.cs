@@ -6,18 +6,7 @@ namespace RadioHeardleServer.Data
 {
 	public class DisplayConsts
 	{
-		public static Dictionary<int, AlbumColours> AlbumCovers = new Dictionary<int, AlbumColours>()
-		{
-			{ 0, new AlbumColours(Grey.Lighten4, Yellow.Darken2) },
-			{ 1, new AlbumColours(Grey.Darken4, Brown.Lighten2) },
-			{ 2, new AlbumColours(Shades.White, BlueGrey.Lighten3) },
-			{ 3, new AlbumColours(BlueGrey.Darken4, Shades.White) },
-			{ 4, new AlbumColours(Red.Darken1, Shades.Black) },
-			{ 5, new AlbumColours(Blue.Lighten2, Red.Lighten2) },
-			{ 6, new AlbumColours(Shades.Black, Orange.Lighten2) },
-			{ 7, new AlbumColours(Grey.Darken4, Orange.Lighten2) },
-			{ 8, new AlbumColours(Shades.Black, Grey.Lighten3) }
-		};
+		private static string _folder = "img/pixel/";
 
 		public static string[] AlbumNames = new string[9]
 		{
@@ -30,6 +19,32 @@ namespace RadioHeardleServer.Data
 			"In Rainbows",
 			"The King of Limbs",
 			"A Moon Shaped Pool"
+		};
+
+		public static string[] AlbumCovers = new string[9]
+		{
+			_folder + "PabloHoney.png",
+			_folder + "TheBends.png",
+			_folder + "OKComputer.png",
+			_folder + "KidA.png",
+			_folder + "Amnesiac.png",
+			_folder + "HailToTheThief.png",
+			_folder + "InRainbows.png",
+			_folder + "TheKingOfLimbs.png",
+			_folder + "AMoonShapedPool.png"
+		};
+
+		public static AlbumColours[] AlbumColours = new AlbumColours[9]
+		{
+			new AlbumColours(Grey.Lighten4, Yellow.Darken2),
+			new AlbumColours(Grey.Darken4, Brown.Lighten2),
+			new AlbumColours(Shades.White, BlueGrey.Lighten3),
+			new AlbumColours(BlueGrey.Darken4, Shades.White),
+			new AlbumColours(Red.Darken1, Shades.Black),
+			new AlbumColours(Blue.Lighten2, Red.Lighten2) ,
+			new AlbumColours(Shades.Black, Orange.Lighten2),
+			new AlbumColours(Grey.Darken4, Orange.Lighten2),
+			new AlbumColours(Shades.Black, Grey.Lighten3)
 		};
 	}
 
