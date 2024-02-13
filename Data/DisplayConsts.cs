@@ -6,7 +6,7 @@ namespace RadioHeardleServer.Data
 {
 	public class DisplayConsts
 	{
-		private static string _folder = "img/pixel/";
+		private static string _folder = "img/";
 
 		public static string[] AlbumNames = new string[9]
 		{
