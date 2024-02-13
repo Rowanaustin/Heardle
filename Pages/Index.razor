@@ -76,8 +76,19 @@
 					</MudCardContent>
 			</MudCard>
 
-			<MudText hidden="@gameIncomplete" Align="Align.Center" Typo="Typo.h4">@_songName</MudText>
-			<MudStack Justify="Justify.Center">
+			<MudStack Justify="Justify.Center" Spacing="2">
+				<MudSpacer/>
+
+					<MudText hidden="@gameIncomplete" Align="Align.Center" Typo="Typo.h4">@_songName</MudText>
+
+					<MudText hidden="@gameIncomplete" Align="Align.Center" Typo="Typo.caption">@DisplayConsts.AlbumNames[_albumIndex]</MudText>
+
+					<MudStack Row="true" Justify="Justify.Center" AlignItems="AlignItems.Center">
+					<MudImage Src="@DisplayConsts.AlbumCovers[_albumIndex]"
+						Class="rounded-0" Style="@($"width: 4pc; height: 4pc; color:" + DisplayConsts.AlbumColours[_albumIndex].Background )" ObjectPosition="ObjectPosition.Center"
+						/>
+					</MudStack>
+			
 				<MudChip hidden="@gameIncomplete" Color="@chipColor" Text="@chipText"></MudChip>
 			</MudStack>
 		
@@ -202,6 +213,7 @@
 
 	private string _audioAddress;
 	private string _songName;
+	private int _albumIndex;
 	private string _editionDate;
 	private int _editionVersion;
 	private int[] _currentResults;
@@ -246,6 +258,7 @@
 		var displayData = FileOperationsService.GetData();
 		_audioAddress = "./Audio/" + displayData._songData._fileName;
 		_songName = displayData._songData._songName;
+		_albumIndex = displayData._songData._albumIndex;
 		_editionDate = displayData._updateDate.DayOfWeek + " " + displayData._updateDate.Date.ToString("d", new CultureInfo("en-GB"));
 		_editionVersion = displayData._version;
 		BestUserData = displayData._bestUserData;
