@@ -16,14 +16,13 @@
 		</MudStack>
 		
 
-		<MudGrid Spacing="0" Justify="Justify.Center">
+		<MudStack Spacing="0">
 			@foreach(var song in Songs)
 			{
-				<MudItem>
-				<MudChip OnClick="() => OnClickChip(song._songName)" Disabled="@(GuessedSongs.Contains(song._songName))" Style="@Style" Text="@song._songName"></MudChip>
-				</MudItem>
+				@*<MudChip  OnClick="() => OnClickChip(song._songName)" Disabled="@(GuessedSongs.Contains(song._songName))" Style="@Style" Text="@song._songName"></MudChip>*@
+				<MudButton Variant="Variant.Outlined" OnClick="() => OnClickChip(song._songName)" Disabled="@(GuessedSongs.Contains(song._songName))" Style="@Style">@song._songName</MudButton>
 			}
-		</MudGrid>
+		</MudStack>
 	</MudStack>
 </MudContainer>
 
