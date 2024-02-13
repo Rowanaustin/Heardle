@@ -84,7 +84,7 @@
 					<MudText hidden="@gameIncomplete" Align="Align.Center" Typo="Typo.caption">@DisplayConsts.AlbumNames[_albumIndex]</MudText>
 
 					<MudStack Row="true" Justify="Justify.Center" AlignItems="AlignItems.Center">
-					<MudImage Src="@DisplayConsts.AlbumCovers[_albumIndex]"
+					<MudImage hidden="@gameIncomplete" Src="@DisplayConsts.AlbumCovers[_albumIndex]"
 						Class="rounded-0" Style="@($"width: 20pc; height: 20pc; color:" + DisplayConsts.AlbumColours[_albumIndex].Background )" ObjectPosition="ObjectPosition.Center"
 						/>
 					</MudStack>
