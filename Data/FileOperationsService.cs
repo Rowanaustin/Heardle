@@ -43,8 +43,9 @@ namespace RadioHeardleServer.Data
 			var bestScore = GetBestUserScore();
 			var bestUsers = GetBestUserTags();
 			var bestUserData = new BestUserData(bestScore, bestUsers);
+			var queueRemaining = GetQueueLength();
 
-			return new DisplayData(songData, updated, version, bestUserData);
+			return new DisplayData(songData, updated, version, bestUserData, queueRemaining);
 		}
 
 /*		public List<string> GetSearchSongs(string searchStr)
@@ -144,6 +145,13 @@ namespace RadioHeardleServer.Data
 			Random r = new();
 
 			return list.OrderBy(_ => r.Next()).ToArray();
+		}
+
+		private static int GetQueueLength()
+		{
+			var countArray = ReadLines(songQueueFile);
+
+			return countArray.Length;
 		}
 
 		private static SongData[] GetSongList()

@@ -116,16 +116,31 @@
 			<MudStack>
 				<MudCard>
 					<MudCardContent>
-						<MudStack Justify="Justify.SpaceBetween" Row=true>
-							<MudStack>
-									<MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Surface" OnClick="OnCloseOverlay">Close</MudButton>
-								<MudItem></MudItem>
-							</MudStack>
+						<MudStack Spacing="2">
+							<MudStack Justify="Justify.SpaceBetween" Row=true>
+								<MudStack>
+										<MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Surface" OnClick="OnCloseOverlay">Close</MudButton>
+									<MudItem></MudItem>
+								</MudStack>
 								<MudText Class="pa-4" Color="Color.Primary" Align="Align.Right"><h2>About</h2></MudText>
-						</MudStack>
+							</MudStack>
 							<MudText Typo="Typo.body2">Guess the Radiohead song - you get 5 attempts.</MudText>
 							<MudText Typo="Typo.body2">Guessing incorrectly or skipping will unlock the next section of the preview.</MudText>
 							<MudText Typo="Typo.body2">The answers are all from the 9 studio albums.</MudText>
+							<MudText Typo="Typo.body2">The songs are pre-shuffled and looped through before the list refreshes to lessen the chance of repeats. </MudText>
+							
+							<MudSpacer/>
+
+							
+							<MudStack Row="true" Justify="Justify.SpaceBetween">
+								<MudSpacer/>
+								<MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0">
+									<MudText Align="Align.Center">Days before refresh:</MudText>
+									<MudText Class="pa-2" Align="Align.Center" Color="Color.Primary">@_songsRemainingBeforeRefresh</MudText>
+								</MudStack>
+							</MudStack>
+
+						</MudStack>
 					</MudCardContent>
 				</MudCard>
 
@@ -219,6 +234,8 @@
 	private int[] _currentResults;
 	private int _lastVersionWon;
 
+	private int _songsRemainingBeforeRefresh;
+
 	private bool loading = true;
 	private bool loaded = false;
 
@@ -262,6 +279,7 @@
 		_editionDate = displayData._updateDate.DayOfWeek + " " + displayData._updateDate.Date.ToString("d", new CultureInfo("en-GB"));
 		_editionVersion = displayData._version;
 		BestUserData = displayData._bestUserData;
+		_songsRemainingBeforeRefresh = displayData._queueRemaining;
 		_jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/SoundScripts.js");
 		CookiesService.Setup(ProtectedLocalStore);
 		await CookiesService.LoadStorage();
