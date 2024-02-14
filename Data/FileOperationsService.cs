@@ -150,8 +150,9 @@ namespace RadioHeardleServer.Data
 		private static int GetQueueLength()
 		{
 			var countArray = ReadLines(songQueueFile);
+			var actualSongs = countArray.Where(s => !string.IsNullOrEmpty(s));
 
-			return countArray.Length;
+			return actualSongs.Count();
 		}
 
 		private static SongData[] GetSongList()
