@@ -45,7 +45,7 @@
 						
 						@foreach (var name in BestScoreToday.UserTags)
 						{
-							<MudChip DisableRipple="true" Variant="Variant.Outlined" Color="Color.Success">@name</MudChip>
+							<BestUserChip UserTag="@name" OnClick="HandleUserChipClicked"/>
 						}
 						
 						@if (HasTopScoreWithoutName)
@@ -55,6 +55,13 @@
 
 					</MudChipSet>
 				</MudItem>
+
+				<MudPopover @bind-Open="_userPopoverOpen" OverflowBehavior="OverflowBehavior.FlipAlways" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter" 
+				Paper="false">
+					<MudPaper Outlined="true" Class="px-4 py-4" @onclick="() => OnUserPopoverClicked()">
+						<MudText Typo="Typo.caption">@_userPopoverText</MudText>
+					</MudPaper>
+				</MudPopover>
 			}
 
 		</MudStack>
@@ -97,6 +104,19 @@
 	[Parameter]
 	public bool HasTopScoreWithoutName { get; set; }
 
+	private bool _userPopoverOpen = false;
+	private string _userPopoverText = string.Empty;
+
+	private void HandleUserChipClicked(string userTag)
+	{
+		_userPopoverText = userTag;
+		_userPopoverOpen = true;
+	}
+
+	private void OnUserPopoverClicked()
+	{
+		_userPopoverOpen = false;
+	}
 
 	private ChartOptions chartOptions = new ChartOptions()
 	{
