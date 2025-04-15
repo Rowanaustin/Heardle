@@ -1,6 +1,6 @@
 ﻿@using MudBlazor
 
-<MudChip OnClick="HandleOnClick" DisableRipple="true" Variant="Variant.Outlined" Color="Color.Success">@_name</MudChip>
+<MudChip T="string" OnClick="HandleOnClick" Ripple="false" Variant="Variant.Outlined" Color="Color.Success">@_name</MudChip>
 
 @code {
     private string _name = string.Empty;

@@ -34,18 +34,18 @@ namespace RadioHeardleServer.Data
 			_folder + "AMoonShapedPool.png"
 		};
 
-		public static AlbumColours[] AlbumColours = new AlbumColours[9]
-		{
-			new AlbumColours(Grey.Lighten4, Yellow.Darken2),
-			new AlbumColours(Grey.Darken4, Brown.Lighten2),
-			new AlbumColours(Shades.White, BlueGrey.Lighten3),
-			new AlbumColours(BlueGrey.Darken4, Shades.White),
-			new AlbumColours(Red.Darken1, Shades.Black),
-			new AlbumColours(Blue.Lighten2, Red.Lighten2) ,
-			new AlbumColours(Shades.Black, Orange.Lighten2),
-			new AlbumColours(Grey.Darken4, Orange.Lighten2),
-			new AlbumColours(Shades.Black, Grey.Lighten3)
-		};
+		public static AlbumColours[] AlbumColours =
+		[
+			new (Gray.Lighten4, Yellow.Darken2),
+			new (Gray.Darken4, Brown.Lighten2),
+			new (Shades.White, BlueGray.Lighten3),
+			new (BlueGray.Darken4, Shades.White),
+			new (Red.Darken1, Shades.Black),
+			new (Blue.Lighten2, Red.Lighten2) ,
+			new (Shades.Black, Orange.Lighten2),
+			new (Gray.Darken4, Orange.Lighten2),
+			new (Shades.Black, Gray.Lighten3)
+		];
 	}
 
 	public class AlbumColours

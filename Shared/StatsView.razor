@@ -41,7 +41,7 @@
 				</MudItem>
 
 				<MudItem xs="7">
-					<MudChipSet>
+					<MudChipSet T="MudChip<string>">
 						
 						@foreach (var name in BestScoreToday.UserTags)
 						{
@@ -50,7 +50,7 @@
 						
 						@if (HasTopScoreWithoutName)
 						{
-							<MudChip OnClick="OnGoToNameSet" DisableRipple="true" Variant="Variant.Text" Color="Color.Secondary"><i>&lt;your-name&gt;</i></MudChip>
+							<MudChip T="string" OnClick="OnGoToNameSet" Ripple="false" Variant="Variant.Text" Color="Color.Secondary"><i>&lt;your-name&gt;</i></MudChip>
 						}
 
 					</MudChipSet>
@@ -118,12 +118,12 @@
 		_userPopoverOpen = false;
 	}
 
-	private ChartOptions chartOptions = new ChartOptions()
+	private ChartOptions chartOptions = new()
 	{
 		LineStrokeWidth = 20.0,
 		YAxisTicks = 1,
-		DisableLegend = true,
-		ChartPalette = new string[] { Colors.Green.Default, Colors.LightBlue.Default }
+		ShowLegend = false,
+		ChartPalette = new[] { Colors.Green.Default, Colors.LightBlue.Default }
 	};
 
 	private string AutoHighlight()

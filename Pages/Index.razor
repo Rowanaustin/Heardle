@@ -4,7 +4,8 @@
 @using MudBlazor.Services
 @using RadioHeardleServer.Data;
 @using System.Globalization;
-@using Fastenshtein;
+
+@implements IBrowserViewportObserver
 
 @inject IJSRuntime JsRuntime
 @inject FileOperationsService FileOperationsService
@@ -69,7 +70,7 @@
 					<MudProgressLinear Color="Color.Primary" Value="@Value" Size="Size.Large" />
 
 					<MudStack Row="true" Justify="Justify.SpaceBetween">
-						<MudSwitch @bind-Checked="@PlaySwitch" Label="Play" Color="Color.Success" />
+						<MudSwitch T="bool" @bind-Value="@PlaySwitch" Label="Play" Color="Color.Success" />
 						<MudButton @onclick="@HandleOnSkip" Disabled="@GameCompleted">@Skip</MudButton>
 					</MudStack>
 					
@@ -89,7 +90,7 @@
 						/>
 					</MudStack>
 			
-				<MudChip hidden="@gameIncomplete" Color="@chipColor" Text="@chipText"></MudChip>
+				<MudChip T="string" hidden="@gameIncomplete" Color="@chipColor" Text="@chipText"></MudChip>
 			</MudStack>
 		
 			<MudCard hidden="@GameCompleted">
@@ -155,7 +156,7 @@
 
 				<MudCard>
 					<MudCardContent>
-						<MudSwitch @bind-Checked="IsDarkMode" Label="Dark Mode" Color="Color.Surface" />
+						<MudSwitch T="bool" @bind-Value="IsDarkMode" Label="Dark Mode" Color="Color.Surface" />
 					</MudCardContent>
 				</MudCard>
 					
@@ -170,27 +171,27 @@
 <MudThemeProvider Theme="RadioheardleTheme" IsDarkMode="@_isDarkMode"></MudThemeProvider>
 
 
-<audio id="audioPlayer" src='@_audioAddress' type="audio/mpeg" />
+<audio id="audioPlayer" src='@_audioAddress' type="audio/mpeg"></audio>
 
 
 @code {
 
 	private static int _numGuesses = 5;
 	private static int _totalSectionDuration = 20;
-	private static int[] _sectionDurations = new int[] { 1, 2, 3, 5, 9, 0 };
+	private static int[] _sectionDurations = new[] { 1, 2, 3, 5, 9, 0 };
 	private static float _bufferPart = 100 / _totalSectionDuration;
 	private static int _bufferTick = _totalSectionDuration * 10;
 
-	public bool GameCompleted { get; set; } = false;
-	public bool WaitingToShowStats { get; set; } = false;
-	public int Value { get; set; } = 0;
+	public bool GameCompleted { get; set; }
+	public bool WaitingToShowStats { get; set; }
+	public int Value { get; set; }
 	public float BufferValue { get; set; } = _bufferPart * _sectionDurations[0];
 
 	public StatisticsData Statistics = new();
 
 	public BestUserData BestUserData;
 	private string _userTag;
-	private bool _dayScorePushed = false;
+	private bool _dayScorePushed;
 
 	public List<ChartSeries> Series { get; set; }
 	public string[] XAxisLabels { get; set; }
@@ -202,12 +203,12 @@
 	public string Skip { get; set; } = "Skip";
 
 	private bool gameIncomplete = true;
-	private bool _helpVisible = false;
-	private bool _statsVisible = false;
+	private bool _helpVisible;
+	private bool _statsVisible;
 	private Color chipColor;
 	private string chipText;
 
-	private bool _playSwitch = false;
+	private bool _playSwitch;
 	public bool PlaySwitch
 	{
 		get { return _playSwitch; }
@@ -219,7 +220,7 @@
 	private string _guesses = "";
 	private List<string> _guessedSongs = new();
 
-	private bool _guessInputFocused = false;
+	private bool _guessInputFocused;
 
 	private bool _userTagNotInEdit = true;
 
@@ -237,17 +238,22 @@
 	private int _songsRemainingBeforeRefresh;
 
 	private bool loading = true;
-	private bool loaded = false;
-
-	private bool _disposed;
-
-	[Inject] IBreakpointService BreakpointListener { get; set; }
-
-	private Breakpoint _breakpoint;
-
-	public void Dispose() => _disposed = true;
+	private bool loaded;
 
 	private IJSObjectReference _jsModule;
+	
+	private Breakpoint _breakpoint;
+	
+	[Inject]
+	private IBrowserViewportService BrowserViewportService { get; set; }
+	
+	Guid IBrowserViewportObserver.Id { get; } = Guid.NewGuid();
+
+	ResizeOptions IBrowserViewportObserver.ResizeOptions { get; } = new()
+	{
+		ReportRate = 250,
+		NotifyOnBreakpointOnly = true
+	};
 
 	private bool _isDarkMode = true;
 	public bool IsDarkMode
@@ -256,19 +262,25 @@
 		set { _isDarkMode = value; HandleOnDarkModeChanged(); }
 	}
 
-	public MudTheme RadioheardleTheme = new MudTheme()
+	public MudTheme RadioheardleTheme = new()
 	{
-		Palette = new PaletteLight()
+		PaletteLight = new PaletteLight
 		{
 			Tertiary = Colors.Indigo.Default
 		},
 
-		PaletteDark = new PaletteDark()
+		PaletteDark = new PaletteDark
 		{
 			Tertiary = Colors.Indigo.Default
 		},
+		
+		Shadows = new Shadow(),
+		Typography = new Typography(),
+		LayoutProperties = new LayoutProperties(),
+		ZIndex = new ZIndex(),
+		PseudoCss = new PseudoCss()
 	};
-
+	
 	protected override async Task OnInitializedAsync()
 	{
 		RefreshStats();
@@ -287,15 +299,18 @@
 		RefreshStats();
 		StateHasChanged();
 	}
-
+	
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)
 		{
-			await BreakpointListener.Subscribe(breakpoint => _breakpoint = breakpoint);
-			_breakpoint = BreakpointListener.GetBreakpoint().Result;
+			await BrowserViewportService.SubscribeAsync(this, fireImmediately: true);
 		}
+
+		await base.OnAfterRenderAsync(firstRender);
 	}
+
+	public async ValueTask DisposeAsync() => await BrowserViewportService.UnsubscribeAsync(this);
 
 	private void HandleStorageState()
 	{
@@ -351,16 +366,18 @@
 		CookiesService.UpdateStorage(_editionVersion, _guesses, GameCompleted, _currentResults, _lastVersionWon, Statistics.StreakCount, _userTag, _dayScorePushed, _guessedSongs);
 	}
 
-	//private async Task<IEnumerable<string>> AutoComplete(string search)
-	//{
-	//	return FileOperationsService.GetSearchSongs(search).OrderBy(each => Fastenshtein.Levenshtein.Distance(each, search));
-	//}
-
 	private void HandleOnDarkModeChanged()
 	{
 		StateHasChanged();
 		CookiesService.DarkSetting = _isDarkMode;
 		CookiesService.CommitStorage();
+	}
+
+	Task IBrowserViewportObserver.NotifyBrowserViewportChangeAsync(BrowserViewportEventArgs browserViewportEventArgs)
+	{
+		_breakpoint = browserViewportEventArgs.Breakpoint;
+
+		return InvokeAsync(StateHasChanged);
 	}
 
 	private void HandleOnUserTagSet()
@@ -579,7 +596,7 @@
 	private void UpdateDaySubmission()
 	{
 		var score = _guesses.Last() == 'w' ? _guesses.Length : 6;
-		var thisUserData = new BestUserData(score, new List<string>() { CookiesService.UserTag });
+		var thisUserData = new BestUserData(score, new List<string> { CookiesService.UserTag });
 		FileOperationsService.PushBestScoreData(thisUserData);
 		_dayScorePushed = true;
 		CookiesService.DayScorePushedWithTag = _userTag;
@@ -627,18 +644,18 @@
 		{
 			if (_guesses.EndsWith('w'))
 			{
-				current[_guesses.Length - 1] = (double)results[_guesses.Length];
+				current[_guesses.Length - 1] = results[_guesses.Length];
 				mainArray[_guesses.Length - 1] = 0;
 			}
 		}
 
-		Series = new List<ChartSeries>()
+		Series = new List<ChartSeries>
 		{
-			new ChartSeries() { Name = "Current", Data = current },
-			new ChartSeries() { Name = "Guess Distribution", Data = mainArray }
+			new ChartSeries { Name = "Current", Data = current },
+			new ChartSeries { Name = "Guess Distribution", Data = mainArray }
 		};
 
-		XAxisLabels = new string[]{ "1", "2", "3", "4", "5" };
+		XAxisLabels = new[]{ "1", "2", "3", "4", "5" };
 	}
 
 	private void CallJsFunc(string funcName)
